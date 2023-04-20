@@ -6,13 +6,15 @@ import random
 import asyncio
 import aiofiles
 import datetime
+import re
 from Adarsh.utils.broadcast_helper import send_msg
 from Adarsh.utils.database import Database
 from Adarsh.bot import StreamBot
 from Adarsh.vars import Var
 from pyrogram import filters, Client
 from pyrogram.types import Message
-db = Database(Var.DATABASE_URL, Var.name)
+
+db = Database(Var.DATABASE_URL, Var.NAME)
 Broadcast_IDs = {}
 
 @StreamBot.on_message(filters.command("users") & filters.private )
@@ -21,7 +23,27 @@ async def sts(c: Client, m: Message):
     if user_id in Var.OWNER_ID:
         total_users = await db.total_users_count()
         await m.reply_text(text=f"Total Users in DB: {total_users}", quote=True)
+
+@StreamBot.on_message(filters.command("userslist") & filters.private )       
+async def sts(c: Client, m: Message):
+    user_id=m.from_user.id
+    if user_id in Var.OWNER_ID:
+        await m.reply_text(text=f"<b>It's may take several moment !</b> \n__Please Wait__ ", quote=True)
+        users_list = []
+        all_users = await db.get_all_users()
+        async for user in all_users:
+            users_list.append(f"[{user['id']}](tg://user?id={user['id']})")
+        await m.reply_text(text=f"All Users: \n\n {users_list}", quote=True)
         
+@StreamBot.on_message(filters.command("deluser") & filters.private )       
+async def sts(c: Client, m: Message):
+    user_id=m.from_user.id
+    if user_id in Var.OWNER_ID:
+        deluser_ids = re.findall(r"([\d]+)", m.text)
+        await m.reply_text(text=f"<b>It's may take several moment !</b> \n Users : {deluser_ids} ", quote=True)
+        for deluser_id in deluser_ids:
+            await db.delete_user(deluser_id)
+            await m.reply_text(text=f"<b>User [{deluser_id}](tg://user?id={deluser_id}) deleted.</b>", quote=True)
         
 @StreamBot.on_message(filters.command("broadcast") & filters.private  & filters.user(list(Var.OWNER_ID)))
 async def broadcast_(c, m):

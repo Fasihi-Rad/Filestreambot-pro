@@ -99,8 +99,8 @@ and to stop the whole bot,
 Setting up things
 
 If you're on Heroku, just add these in the Environmental Variables
-or if you're Locally hosting, create a file named `config.env` in the root directory and add all the variables there.
-An example of `config.env` file:
+or if you're Locally hosting, create a file named `.env` in the root directory and add all the variables there.
+An example of `.env` file:
 
 ```py
 API_ID=12345
@@ -129,7 +129,7 @@ DATABASE_URL=mongodb_uri
   
 `OWNER_USERNAME` : U should be knowing it afterall it's your username dont remember it? just go to settings!
 
-`OWNER_ID` : Your Telegram User ID
+`OWNER_ID` : Your Telegram User ID, If you want to have admin, add him/his ID here. Use Space to separate IDs.
 
 `DATABASE_URL` : MongoDB URI for saving User IDs when they first Start the Bot. We will use that for Broadcasting to them. I will try to add more features related with Database. If you need help to get the URI you can click on logo below!
 

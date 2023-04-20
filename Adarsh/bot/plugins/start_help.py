@@ -10,14 +10,14 @@ from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import UserNotParticipant
 from Adarsh.utils.file_properties import get_name, get_hash, get_media_file_size
-db = Database(Var.DATABASE_URL, Var.name)
+db = Database(Var.DATABASE_URL, Var.NAME)
 from pyrogram.types import ReplyKeyboardMarkup
 
 if MY_PASS:
             buttonz=ReplyKeyboardMarkup(
             [
-                ["start⚡️","help📚","login🔑","DC"],
-                ["follow❤️","ping📡","status📊","maintainers😎"]
+                ["Start⚡️","Help📚","Login🔑","DC"],
+                ["Follow❤️","Ping📡","Status📊","Maintainers😎"]
                         
             ],
             resize_keyboard=True
@@ -25,8 +25,8 @@ if MY_PASS:
 else:
             buttonz=ReplyKeyboardMarkup(
             [
-                ["start⚡️","help📚","DC"],
-                ["follow❤️","ping📡","status📊","maintainers😎"]
+                ["Start⚡️","Help📚","DC"],
+                ["Follow❤️","Ping📡","Status📊","Maintainers😎"]
                         
             ],
             resize_keyboard=True

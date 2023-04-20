@@ -12,7 +12,8 @@ from pyrogram.errors import FloodWait, UserNotParticipant
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from Adarsh.utils.file_properties import get_name, get_hash, get_media_file_size
-db = Database(Var.DATABASE_URL, Var.name)
+
+db = Database(Var.DATABASE_URL, Var.NAME)
 
 
 MY_PASS = os.environ.get("MY_PASS", None)
@@ -24,12 +25,12 @@ pass_db = Database(Var.DATABASE_URL, "ag_passwords")
 async def login_handler(c: Client, m: Message):
     try:
         try:
-            ag = await m.reply_text("Now send me password.\n\n If You don't know check the MY_PASS Variable in heroku \n\n(You can use /cancel command to cancel the process)")
+            ag = await m.reply_text("<b>Now send me password.</b>\n\n __You can use /cancel command to cancel the process__")
             _text = await c.listen(m.chat.id, filters=filters.text, timeout=90)
             if _text.text:
                 textp = _text.text
                 if textp == "/cancel":
-                   await ag.edit("Process Cancelled Successfully")
+                   await ag.edit("Process Cancelled")
                    return
             else:
                 return
@@ -38,9 +39,9 @@ async def login_handler(c: Client, m: Message):
             return
         if textp == MY_PASS:
             await pass_db.add_user_pass(m.chat.id, textp)
-            ag_text = "yeah! you entered the password correctly"
+            ag_text = "Password is correct"
         else:
-            ag_text = "Wrong password, try again"
+            ag_text = "Wrong password, Try again"
         await ag.edit(ag_text)
     except Exception as e:
         print(e)
@@ -50,7 +51,7 @@ async def private_receive_handler(c: Client, m: Message):
     if MY_PASS:
         check_pass = await pass_db.get_user_pass(m.chat.id)
         if check_pass== None:
-            await m.reply_text("Login first using /login cmd \n don\'t know the pass? request it from the Developer")
+            await m.reply_text("<b>Login first using /login cmd</b> \n Don't know the pass? request it from the Developer")
             return
         if check_pass != MY_PASS:
             await pass_db.delete_user(m.chat.id)
@@ -67,7 +68,7 @@ async def private_receive_handler(c: Client, m: Message):
             if user.status == "kicked":
                 await c.send_message(
                     chat_id=m.chat.id,
-                    text="You are banned!\n\n  **Cᴏɴᴛᴀᴄᴛ Dᴇᴠᴇʟᴏᴘᴇʀ [Adarsh Goel](https://github.com/adarsh-goel) ʜᴇ Wɪʟʟ Hᴇʟᴘ Yᴏᴜ**",
+                    text=f"You are banned!\n\n  **Cᴏɴᴛᴀᴄᴛ [Server Owner](tg://user?id={Var.OWNER_ID[0]}) ʜᴇ Wɪʟʟ Hᴇʟᴘ Yᴏᴜ**",
                     
                     disable_web_page_preview=True
                 )
@@ -90,7 +91,7 @@ async def private_receive_handler(c: Client, m: Message):
             await m.reply_text(e)
             await c.send_message(
                 chat_id=m.chat.id,
-                text="**Sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ Wʀᴏɴɢ. Cᴏɴᴛᴀᴄᴛ ᴍʏ ʙᴏss** [Adarsh Goel](https://github.com/adarsh-goel)",
+                text=f"**Sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ Wʀᴏɴɢ. Cᴏɴᴛᴀᴄᴛ ᴍʏ ʙᴏss** [Server Owner](tg://user?id={Var.OWNER_ID[0]})",
                 
                 disable_web_page_preview=True)
             return
