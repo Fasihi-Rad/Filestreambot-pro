@@ -52,7 +52,7 @@ async def sts(c: Client, m: Message):
         banuser_ids = re.findall(r"([\d]+)", m.text)
         await m.reply_text(text=f"<b>It's may take several moment !</b> \n Users : {banuser_ids} ", quote=True)
         for banuser_id in banuser_ids:
-            await db.Kick_user(banuser_id)
+            await db.ban_user(banuser_id)
             await m.reply_text(text=f"<b>User [{banuser_id}](tg://user?id={banuser_ids}) baned.</b>", quote=True)
 
 @StreamBot.on_message(filters.command("userinfo") & filters.private )       

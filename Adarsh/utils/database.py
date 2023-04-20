@@ -52,7 +52,7 @@ class Database:
     async def delete_user(self, id):
         await self.col.delete_many({'id': int(id)})
     
-    async def Kick_user(self, id):
+    async def ban_user(self, id):
         await self.col.update_one({'id': int(id)}, {'$set': {'status': 'ban'}})
 
     async def increase_link(self, id):

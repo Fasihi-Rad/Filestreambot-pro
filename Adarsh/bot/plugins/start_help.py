@@ -40,26 +40,26 @@ async def login_handler(c: Client, m: Message):
 
 @StreamBot.on_message((filters.private) & (filters.document | filters.video | filters.audio | filters.photo) , group=4)
 async def private_receive_handler(c: Client, m: Message):
-    if Var.MY_PASS:
-        if await db.check_user_status(m.chat.id) == 'none':
-            await m.reply_text("<b>Login first using /login cmd</b> \n Don't know the pass? request it from the Developer")
-            return
-        
-    if await db.check_user_status(m.chat.id) == 'ban':
-        await c.send_message(
-            chat_id=m.chat.id,
-            text=f"You are banned!\n\n  **Cᴏɴᴛᴀᴄᴛ [Server Owner](tg://user?id={Var.OWNER_ID[0]}) ʜᴇ Wɪʟʟ Hᴇʟᴘ Yᴏᴜ**",
-                    
-            disable_web_page_preview=True
-            )
-        return
-    
     if not await db.is_user_exist(m.from_user.id):
         await db.add_user(m.from_user.id, m.from_user.first_name, m.from_user.last_name, m.from_user.username)
         await c.send_message(
             Var.BIN_CHANNEL,
             f"New User Joined! : \n\n Name : [{m.from_user.first_name}](tg://user?id={m.from_user.id}) Started Your Bot!!"
         )
+
+    if Var.MY_PASS:
+        if await db.check_user_status(m.chat.id) == 'none':
+            await m.reply_text("<b>Login first using /login cmd</b> \n Don't know the pass? request it from the Developer")
+            return
+
+    if await db.check_user_status(m.chat.id) == 'ban':
+        await c.send_message(
+            chat_id=m.chat.id,
+            text=f"You are banned!\n\n  **Cᴏɴᴛᴀᴄᴛ [Server Owner](tg://user?id={Var.OWNER_ID[0]}) ʜᴇ Wɪʟʟ Hᴇʟᴘ Yᴏᴜ**",    
+            disable_web_page_preview=True
+            )
+        return
+    
     if Var.UPDATES_CHANNEL != "None":
         try:
             user = await c.get_chat_member(Var.UPDATES_CHANNEL, m.chat.id)
@@ -67,10 +67,10 @@ async def private_receive_handler(c: Client, m: Message):
                 await c.send_message(
                     chat_id=m.chat.id,
                     text=f"You are banned!\n\n  **Cᴏɴᴛᴀᴄᴛ [Server Owner](tg://user?id={Var.OWNER_ID[0]}) ʜᴇ Wɪʟʟ Hᴇʟᴘ Yᴏᴜ**",
-                    
                     disable_web_page_preview=True
                 )
-                return 
+                return
+
         except UserNotParticipant:
             await c.send_message(
                 chat_id=m.chat.id,
@@ -85,6 +85,7 @@ async def private_receive_handler(c: Client, m: Message):
                 
             )
             return
+
         except Exception as e:
             await m.reply_text(e)
             await c.send_message(
