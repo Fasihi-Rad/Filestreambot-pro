@@ -16,7 +16,7 @@ if Var.MY_PASS:
             buttonz=ReplyKeyboardMarkup(
             [
                 ["Start⚡️","Help📚","Login🔑","DC"],
-                ["Follow❤️","Ping📡","Status📊","Maintainers😎"]
+                ["Support❤️","Ping📡","Status📊","Maintainers😎"]
                         
             ],
             resize_keyboard=True
@@ -25,14 +25,14 @@ else:
             buttonz=ReplyKeyboardMarkup(
             [
                 ["Start⚡️","Help📚","DC"],
-                ["Follow❤️","Ping📡","Status📊","Maintainers😎"]
+                ["Support❤️","Ping📡","Status📊","Maintainers😎"]
                         
             ],
             resize_keyboard=True
         )
 
 
-@StreamBot.on_message((filters.command("start") | filters.regex('start⚡️')) & filters.private )
+@StreamBot.on_message((filters.command("start") | filters.regex('Start⚡️')) & filters.private )
 async def start(b, m):
     if not await db.is_user_exist(m.from_user.id):
         await db.add_user(m.from_user.id, m.from_user.first_name, m.from_user.last_name, m.from_user.username)
@@ -79,7 +79,7 @@ async def start(b, m):
         reply_markup=buttonz)
 
 
-@StreamBot.on_message((filters.command("help") | filters.regex('help📚')) & filters.private )
+@StreamBot.on_message((filters.command("help") | filters.regex('Help📚')) & filters.private )
 async def help_handler(bot, message):
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name, message.from_user.last_name, message.from_user.username)
@@ -93,7 +93,7 @@ async def help_handler(bot, message):
             if user.status == "kicked":
                 await bot.send_message(
                     chat_id=message.chat.id,
-                    text="<i>Sᴏʀʀʏ Sɪʀ, Yᴏᴜ ᴀʀᴇ Bᴀɴɴᴇᴅ FROM USING ᴍᴇ. Cᴏɴᴛᴀᴄᴛ ᴛʜᴇ Dᴇᴠᴇʟᴏᴘᴇʀ</i>",
+                    text=f"<i>Sᴏʀʀʏ Sɪʀ, Yᴏᴜ ᴀʀᴇ Bᴀɴɴᴇᴅ FROM USING ᴍᴇ. Cᴏɴᴛᴀᴄᴛ the [Server Owner](tg://user?id={Var.OWNER_ID[0]})</i>",
                     
                     disable_web_page_preview=True
                 )
@@ -116,18 +116,19 @@ async def help_handler(bot, message):
         except Exception:
             await bot.send_message(
                 chat_id=message.chat.id,
-                text="__Sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ Wʀᴏɴɢ. Cᴏɴᴛᴀᴄᴛ ᴍᴇ__ [ADARSH GOEL](https://github.com/adarsh-goel/-pro/issues).",
+                text=f"__Sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ Wʀᴏɴɢ. Cᴏɴᴛᴀᴄᴛ the__ [Server Owner](tg://user?id={Var.OWNER_ID[0]}).",
                 disable_web_page_preview=True)
             return
     await message.reply_text(
-        text="""<b> Send me any file or video i will give you streamable link and download link.</b>\n
-<b> I also support Channels, add me to you Channel and send any media files and see miracle✨ also send /list to know all commands""",
+        text="""<b>Send me any file or video I will give you streamable link and download link.</b>\n"""\
+             """<b>I also support Channels, Add me to you Channel and send any media files and see miracle✨ Also send /list to know all commands.\nAdmins could use /admin to see admin's commands list.\n\n"""\
+             """<b>Don't Forget to use /support .😉</b>""",
         
         disable_web_page_preview=True,
         reply_markup=InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("💁‍♂️ DEV", url="https://github.com/adarsh-goel")],
-                [InlineKeyboardButton("💥 Source Code", url="https://github.com/adarsh-goel/-pro/")]
+                [InlineKeyboardButton("💁‍♂️ Server Owner", url=f"tg://user?id={Var.OWNER_ID[0]}")],
+                # [InlineKeyboardButton("💥 Source Code", url="https://github.com/adarsh-goel/-pro/")]
             ]
         )
     )

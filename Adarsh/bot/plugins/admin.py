@@ -17,6 +17,15 @@ from pyrogram.types import Message
 db = Database(Var.DATABASE_URL, Var.NAME)
 Broadcast_IDs = {}
 
+@StreamBot.on_message(filters.command("admin") & filters.private )
+async def sts(c: Client, m: Message):
+    user_id=m.from_user.id
+    if user_id in Var.OWNER_ID:
+        LIST_MSG = "Hi ! {} Here is a list of all Admin commands \n \n 1 . `/Admin` \n 2. `/users` : Display The Number of Users \n 3. `/userslist` : Display The Names of All Users \n 4. `/deluser` __ID__ : Delete The User \n 5. `/banuser` __ID__ : Ban The User \n 6. `/Status📊` \n 7. `/userinfo` __ID__ : Display The User Info \n 8. `/broadcast` "
+        await c.send_message(chat_id = m.chat.id,
+            text = LIST_MSG.format(m.from_user.mention(style="md"))
+        )
+
 @StreamBot.on_message(filters.command("users") & filters.private )
 async def sts(c: Client, m: Message):
     user_id=m.from_user.id
@@ -73,7 +82,7 @@ async def sts(c: Client, m: Message):
             await m.reply_text(botstats)
         
 @StreamBot.on_message(filters.command("broadcast") & filters.private  & filters.user(list(Var.OWNER_ID)))
-async def broadcast_(c, m):
+async def broadcast_(c, m: Message):
     user_id=m.from_user.id
     out = await m.reply_text(
             text=f"Broadcast initiated! You will be notified with log file when all the users are notified."

@@ -13,6 +13,7 @@ db = Database(Var.DATABASE_URL, Var.NAME)
 START_TEXT = """ Your Telegram DC Is : `{}`  """
 
 
+
 @StreamBot.on_message(filters.regex("Maintainers😎"))
 async def maintainers(b,m):
     try:
@@ -33,19 +34,21 @@ async def maintainers(b,m):
                     disable_web_page_preview=True)
             
          
-@StreamBot.on_message(filters.regex("Follow❤️"))
+@StreamBot.on_message(filters.regex("Support❤️"))
 async def follow_user(b,m):
     try:
        await b.send_message(chat_id=m.chat.id,text="HELLO",quote=True)
     except Exception:
                 await b.send_message(
-                    chat_id=m.chat.id,
-                    text=f"<B>HERE'S THE FOLLOW LINK</B>\nModified By [Server Owner](tg://user?id={Var.OWNER_ID[0]})</b>",
+                        chat_id=m.chat.id,
+                        text=f"<b>Support [Server Owner](tg://user?id={Var.OWNER_ID[0]}) By Donation</b>\n"\
+                             f"Please, Support me For keep the server runing \n"\
+                             f"Donation by Crypto :",
                     
                     reply_markup=InlineKeyboardMarkup(
                         [
                             [
-                                InlineKeyboardButton("FOLLOW The Original Creator", url=f"https://GITHUB.COM/adarsh-goel")
+                                InlineKeyboardButton("Donate", url=f"")
                             ]
                         ]
                     ),
@@ -66,7 +69,7 @@ async def start(bot, update):
     
 @StreamBot.on_message(filters.command("list"))
 async def list(l, m):
-    LIST_MSG = "Hi! {} Here is a list of all my commands \n \n 1 . `Start⚡️` \n 2. `Help📚` \n 3. `Login🔑` \n 4. `Follow❤️` \n 5. `Ping📡` \n 6. `Status📊` \n 7. `DC` This tells your telegram data center \n 8. `Maintainers😎` "
+    LIST_MSG = "Hi! {} Here is a list of all my commands \n \n 1 . `Start⚡️` \n 2. `Help📚` \n 3. `Login🔑` \n 4. `Support❤️` \n 5. `Ping📡` \n 6. `Status📊` \n 7. `DC` This tells your telegram data center \n 8. `Maintainers😎` "
     await l.send_message(chat_id = m.chat.id,
         text = LIST_MSG.format(m.from_user.mention(style="md"))
         
