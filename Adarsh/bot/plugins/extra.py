@@ -6,7 +6,9 @@ import shutil, psutil
 from utils_bot import *
 from Adarsh import StartTime
 from Adarsh.vars import Var
+from Adarsh.utils.database import Database
 
+db = Database(Var.DATABASE_URL, Var.NAME)
 
 START_TEXT = """ Your Telegram DC Is : `{}`  """
 
@@ -73,12 +75,12 @@ async def list(l, m):
     
 @StreamBot.on_message(filters.regex("Ping📡"))
 async def ping(b, m):
-    start_t = time.time()
-    ag = await m.reply_text("....")
-    end_t = time.time()
-    time_taken_s = (end_t - start_t) * 1000
-    await ag.edit(f"Pong!\n{time_taken_s:.3f} ms")
-    
+    if await db.check_user_status(m.chat.id) != 'ban':
+        start_t = time.time()
+        ag = await m.reply_text("....")
+        end_t = time.time()
+        time_taken_s = (end_t - start_t) * 1000
+        await ag.edit(f"Pong!\n{time_taken_s:.3f} ms")
     
     
     

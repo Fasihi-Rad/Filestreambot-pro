@@ -22,7 +22,7 @@ async def sts(c: Client, m: Message):
     user_id=m.from_user.id
     if user_id in Var.OWNER_ID:
         total_users = await db.total_users_count()
-        await m.reply_text(text=f"Total Users in DB: {total_users}", quote=True)
+        await m.reply_text(text=f"<b>Total Users in DB: {total_users}</b>", quote=True)
 
 @StreamBot.on_message(filters.command("userslist") & filters.private )       
 async def sts(c: Client, m: Message):
@@ -32,8 +32,8 @@ async def sts(c: Client, m: Message):
         users_list = []
         all_users = await db.get_all_users()
         async for user in all_users:
-            users_list.append(f"[{user['id']}](tg://user?id={user['id']})")
-        await m.reply_text(text=f"All Users: \n\n {users_list}", quote=True)
+            users_list.append(f"[{user['name']}](tg://user?id={user['id']})")
+        await m.reply_text(text="All Users: \n\n" + ('   '.join(users_list)), quote=True)
         
 @StreamBot.on_message(filters.command("deluser") & filters.private )       
 async def sts(c: Client, m: Message):
@@ -44,6 +44,33 @@ async def sts(c: Client, m: Message):
         for deluser_id in deluser_ids:
             await db.delete_user(deluser_id)
             await m.reply_text(text=f"<b>User [{deluser_id}](tg://user?id={deluser_id}) deleted.</b>", quote=True)
+
+@StreamBot.on_message(filters.command("banuser") & filters.private )       
+async def sts(c: Client, m: Message):
+    user_id=m.from_user.id
+    if user_id in Var.OWNER_ID:
+        banuser_ids = re.findall(r"([\d]+)", m.text)
+        await m.reply_text(text=f"<b>It's may take several moment !</b> \n Users : {banuser_ids} ", quote=True)
+        for banuser_id in banuser_ids:
+            await db.Kick_user(banuser_id)
+            await m.reply_text(text=f"<b>User [{banuser_id}](tg://user?id={banuser_ids}) baned.</b>", quote=True)
+
+@StreamBot.on_message(filters.command("userinfo") & filters.private )       
+async def sts(c: Client, m: Message):
+    user_id=m.from_user.id
+    if user_id in Var.OWNER_ID:
+        userinfo_ids = re.findall(r"([\d]+)", m.text)
+        await m.reply_text(text=f"<b>It's may take several moment !</b>", quote=True)
+        for userinfo_id in userinfo_ids:
+            user = await db.user_info(userinfo_id)
+            botstats = f'<b>User [{user["name"]}](tg://user?id={userinfo_ids}) Info : </b> \n\n' \
+                f'<b>Telegram ID:` {user["id"]}`</b>\n' \
+                f'<b>Name:</b> `{user["name"]}`\n' \
+                f'<b>Telegram Username:</b> `{user["telegram_username"]}`\n' \
+                f'<b>Status:</b> `{user["status"]}`\n' \
+                f'<b>Links Made:</b> `{user["link_made"]}`\n' \
+                f'<b>Join Date:</b> `{user["join_date"]}`\n'
+            await m.reply_text(botstats)
         
 @StreamBot.on_message(filters.command("broadcast") & filters.private  & filters.user(list(Var.OWNER_ID)))
 async def broadcast_(c, m):
