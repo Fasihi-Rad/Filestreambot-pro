@@ -10,18 +10,11 @@ from urllib.parse import quote_plus
 from pyrogram import filters, Client
 from pyrogram.errors import FloodWait, UserNotParticipant
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-
 from Adarsh.utils.file_properties import get_name, get_hash, get_media_file_size
 
 db = Database(Var.DATABASE_URL, Var.NAME)
 
-
-MY_PASS = os.environ.get("MY_PASS", None)
-pass_dict = {}
-pass_db = Database(Var.DATABASE_URL, "ag_passwords")
-
-
-@StreamBot.on_message((filters.regex("login🔑") | filters.command("login")) , group=4)
+@StreamBot.on_message((filters.regex("Login🔑") | filters.command("login")) , group=4)
 async def login_handler(c: Client, m: Message):
     try:
         try:
@@ -30,40 +23,43 @@ async def login_handler(c: Client, m: Message):
             if _text.text:
                 textp = _text.text
                 if textp == "/cancel":
-                   await ag.edit("Process Cancelled")
+                   await m.reply_text("Process Cancelled")
                    return
             else:
                 return
         except TimeoutError:
             await ag.edit("I can't wait more for password, try again")
             return
-        if textp == MY_PASS:
-            await pass_db.add_user_pass(m.chat.id, textp)
-            ag_text = "Password is correct"
+        if textp == Var.MY_PASS:
+            await db.login_user(m.chat.id, m.chat.first_name, m.chat.last_name, m.chat.username)
+            await m.reply_text("Password is correct")
         else:
-            ag_text = "Wrong password, Try again"
-        await ag.edit(ag_text)
+            await m.reply_text("Wrong password, Try again")
     except Exception as e:
         print(e)
 
 @StreamBot.on_message((filters.private) & (filters.document | filters.video | filters.audio | filters.photo) , group=4)
 async def private_receive_handler(c: Client, m: Message):
     if not await db.is_user_exist(m.from_user.id):
-        await db.add_user(m.from_user.id)
+        await db.add_user(m.from_user.id, m.from_user.first_name, m.from_user.last_name, m.from_user.username)
         await c.send_message(
             Var.BIN_CHANNEL,
             f"New User Joined! : \n\n Name : [{m.from_user.first_name}](tg://user?id={m.from_user.id}) Started Your Bot!!"
         )
 
-    if MY_PASS:
-        check_pass = await pass_db.get_user_pass(m.chat.id)
-        if check_pass== None:
+    if Var.MY_PASS:
+        if await db.check_user_status(m.chat.id) == 'none':
             await m.reply_text("<b>Login first using /login cmd</b> \n Don't know the pass? request it from the Developer")
             return
-        if check_pass != MY_PASS:
-            await pass_db.delete_user(m.chat.id)
-            return
 
+    if await db.check_user_status(m.chat.id) == 'ban':
+        await c.send_message(
+            chat_id=m.chat.id,
+            text=f"You are banned!\n\n  **Cᴏɴᴛᴀᴄᴛ [Server Owner](tg://user?id={Var.OWNER_ID[0]}) ʜᴇ Wɪʟʟ Hᴇʟᴘ Yᴏᴜ**",    
+            disable_web_page_preview=True
+            )
+        return
+    
     if Var.UPDATES_CHANNEL != "None":
         try:
             user = await c.get_chat_member(Var.UPDATES_CHANNEL, m.chat.id)
@@ -71,10 +67,10 @@ async def private_receive_handler(c: Client, m: Message):
                 await c.send_message(
                     chat_id=m.chat.id,
                     text=f"You are banned!\n\n  **Cᴏɴᴛᴀᴄᴛ [Server Owner](tg://user?id={Var.OWNER_ID[0]}) ʜᴇ Wɪʟʟ Hᴇʟᴘ Yᴏᴜ**",
-                    
                     disable_web_page_preview=True
                 )
-                return 
+                return
+
         except UserNotParticipant:
             await c.send_message(
                 chat_id=m.chat.id,
@@ -89,6 +85,7 @@ async def private_receive_handler(c: Client, m: Message):
                 
             )
             return
+
         except Exception as e:
             await m.reply_text(e)
             await c.send_message(
@@ -103,7 +100,8 @@ async def private_receive_handler(c: Client, m: Message):
         online_link = "http://{}:{}/{}/{}?hash={}".format(Var.FQDN, Var.PORT, log_msg.id, quote_plus(get_name(log_msg)), get_hash(log_msg))
        
         msg_text ="""<i><u>𝗬𝗼𝘂𝗿 𝗟𝗶𝗻𝗸 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗲𝗱 !</u></i>\n\n<b>📂 Fɪʟᴇ ɴᴀᴍᴇ :</b> <i>{}</i>\n\n<b>📦 Fɪʟᴇ ꜱɪᴢᴇ :</b> <i>{}</i>\n\n<b>📥 Dᴏᴡɴʟᴏᴀᴅ :</b> <i>{}</i>\n\n<b> 🖥WATCH  :</b> <i>{}</i>\n\n<b>🚸 Nᴏᴛᴇ : LINK WON'T EXPIRE TILL I DELETE</b>"""
-
+        
+        await db.increase_link(m.chat.id)
         await log_msg.reply_text(text=f"**RᴇQᴜᴇꜱᴛᴇᴅ ʙʏ :** [{m.from_user.first_name}](tg://user?id={m.from_user.id})\n**Uꜱᴇʀ ɪᴅ :** `{m.from_user.id}`\n**Stream ʟɪɴᴋ :** {stream_link}", disable_web_page_preview=True,  quote=True)
         await m.reply_text(
             text=msg_text.format(get_name(log_msg), humanbytes(get_media_file_size(m)), online_link, stream_link),
@@ -112,6 +110,7 @@ async def private_receive_handler(c: Client, m: Message):
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("STREAM 🖥", url=stream_link), #Stream Link
                                                 InlineKeyboardButton('DOWNLOAD 📥', url=online_link)]]) #Download Link
         )
+        
     except FloodWait as e:
         print(f"Sleeping for {str(e.x)}s")
         await asyncio.sleep(e.x)
@@ -120,21 +119,15 @@ async def private_receive_handler(c: Client, m: Message):
 
 @StreamBot.on_message(filters.channel & ~filters.group & (filters.document | filters.video | filters.photo)  & ~filters.forwarded, group=-1)
 async def channel_receive_handler(bot, broadcast):
-    if MY_PASS:
-        check_pass = await pass_db.get_user_pass(broadcast.chat.id)
-        if check_pass == None:
-            await broadcast.reply_text("Login first using /login cmd \n don\'t know the pass? request it from developer!")
+    if Var.MY_PASS:
+        if await db.check_user_status(broadcast.chat.id) == 'none':
+            await broadcast.reply_text("<b>Login first using /login cmd</b> \n Don't know the pass? request it from the Developer")
             return
-
-        if check_pass != MY_PASS:
-            await broadcast.reply_text("Wrong password, login again")
-            await pass_db.delete_user(broadcast.chat.id)
-            return
-
+        
     if int(broadcast.chat.id) in Var.BANNED_CHANNELS:
         await bot.leave_chat(broadcast.chat.id)
         return
-
+    
     try:
         log_msg = await broadcast.forward(chat_id=Var.BIN_CHANNEL)
         stream_link = "http://{}:{}/watch/{}/{}?hash={}".format(Var.FQDN, Var.PORT, log_msg.id, quote_plus(get_name(log_msg)), get_hash(log_msg))
