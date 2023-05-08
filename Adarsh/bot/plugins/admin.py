@@ -13,6 +13,7 @@ from Adarsh.bot import StreamBot
 from Adarsh.vars import Var
 from pyrogram import filters, Client
 from pyrogram.types import Message
+from Adarsh.utils.human_readable import byte_to_human_read
 
 db = Database(Var.DATABASE_URL, Var.NAME)
 Broadcast_IDs = {}
@@ -62,7 +63,7 @@ async def sts(c: Client, m: Message):
         await m.reply_text(text=f"<b>It's may take several moment !</b> \n Users : {banuser_ids} ", quote=True)
         for banuser_id in banuser_ids:
             await db.ban_user(banuser_id)
-            await m.reply_text(text=f"<b>User [{banuser_id}](tg://user?id={banuser_ids}) baned.</b>", quote=True)
+            await m.reply_text(text=f"<b>User [{banuser_id}](tg://user?id={banuser_ids}) banned.</b>", quote=True)
 
 @StreamBot.on_message(filters.command("userinfo") & filters.private )       
 async def sts(c: Client, m: Message):
@@ -77,7 +78,8 @@ async def sts(c: Client, m: Message):
                 f'<b>Name:</b> `{user["name"]}`\n' \
                 f'<b>Telegram Username:</b> `{user["telegram_username"]}`\n' \
                 f'<b>Status:</b> `{user["status"]}`\n' \
-                f'<b>Links Made:</b> `{user["link_made"]}`\n' \
+                f'<b>Today Links Made:</b> `{user["link_made"]}`\n' \
+                f'<b>Today Download Size:</b> `{byte_to_human_read(user["totall_download"])}`\n' \
                 f'<b>Join Date:</b> `{user["join_date"]}`\n'
             await m.reply_text(botstats)
         

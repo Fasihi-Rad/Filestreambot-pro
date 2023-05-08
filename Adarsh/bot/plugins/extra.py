@@ -7,6 +7,7 @@ from utils_bot import *
 from Adarsh import StartTime
 from Adarsh.vars import Var
 from Adarsh.utils.database import Database
+from Adarsh.utils.human_readable import byte_to_human_read
 
 db = Database(Var.DATABASE_URL, Var.NAME)
 
@@ -14,7 +15,7 @@ START_TEXT = """ Your Telegram DC Is : `{}`  """
 
 
 
-@StreamBot.on_message(filters.regex("Maintainers😎"))
+@StreamBot.on_message(filters.regex("Maintainers😎") | filters.command("maintainers"))
 async def maintainers(b,m):
     try:
        await b.send_message(chat_id=m.chat.id,text="HELLO",quote=True)
@@ -34,7 +35,7 @@ async def maintainers(b,m):
                     disable_web_page_preview=True)
             
          
-@StreamBot.on_message(filters.regex("Support❤️"))
+@StreamBot.on_message(filters.regex("Support❤️") | filters.command("support"))
 async def follow_user(b,m):
     try:
        await b.send_message(chat_id=m.chat.id,text="HELLO",quote=True)
@@ -42,16 +43,16 @@ async def follow_user(b,m):
                 await b.send_message(
                         chat_id=m.chat.id,
                         text=f"<b>Support [Server Owner](tg://user?id={Var.OWNER_ID[0]}) By Donation</b>\n"\
-                             f"Please, Support me For keep the server runing \n"\
+                             f"Please, Support me For keep the server runing !\n\n"\
                              f"Donation by Crypto :",
                     
-                    reply_markup=InlineKeyboardMarkup(
-                        [
-                            [
-                                InlineKeyboardButton("Donate", url=f"")
-                            ]
-                        ]
-                    ),
+                    # reply_markup=InlineKeyboardMarkup(
+                    #     [
+                    #         [
+                    #             InlineKeyboardButton("Donate USTD", url=f"")
+                    #         ]
+                    #     ]
+                    # ),
                     
                     disable_web_page_preview=True)
         
@@ -76,7 +77,7 @@ async def list(l, m):
     )
     
     
-@StreamBot.on_message(filters.regex("Ping📡"))
+@StreamBot.on_message(filters.regex("Ping📡") | filters.command("ping"))
 async def ping(b, m):
     if await db.check_user_status(m.chat.id) != 'ban':
         start_t = time.time()
@@ -112,4 +113,9 @@ async def stats(bot, update):
                 f'<b>Disk:</b> {disk}%'
         await update.reply_text(botstats)
     else:
-        await update.reply_text(f"<b>You don't have the permission !</b>")
+        user = await db.user_info(user_id)
+        botstats = f'<b>Bot Uptime:</b> {currentTime}\n\n' \
+                f'<b>Your Status:</b> `{user["status"]}`'\
+                f'<b>Totall Links Made (Today):</b> `{user["link_made"]}`\n' \
+                f'<b>Totall Download Size (Today):</b> `{byte_to_human_read(user["totall_download"])}`\n'
+        await update.reply_text(botstats)

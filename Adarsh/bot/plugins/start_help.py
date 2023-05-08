@@ -1,38 +1,38 @@
-# (c) adarsh-goel 
+# (c) adarsh-goel
+from pyrogram.types import ReplyKeyboardMarkup
+from Adarsh.utils.file_properties import get_name, get_hash, get_media_file_size
+from pyrogram.errors import UserNotParticipant
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram import filters
+from Adarsh.utils.database import Database
+from Adarsh.utils.human_readable import byte_to_human_read
 from Adarsh.bot import StreamBot
 from Adarsh.vars import Var
 import logging
 logger = logging.getLogger(__name__)
-from Adarsh.utils.human_readable import humanbytes
-from Adarsh.utils.database import Database
-from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram.errors import UserNotParticipant
-from Adarsh.utils.file_properties import get_name, get_hash, get_media_file_size
 db = Database(Var.DATABASE_URL, Var.NAME)
-from pyrogram.types import ReplyKeyboardMarkup
 
 if Var.MY_PASS:
-            buttonz=ReplyKeyboardMarkup(
-            [
-                ["Start⚡️","Help📚","Login🔑","DC"],
-                ["Support❤️","Ping📡","Status📊","Maintainers😎"]
-                        
-            ],
-            resize_keyboard=True
-        )
+    buttonz = ReplyKeyboardMarkup(
+        [
+            ["Start⚡️", "Help📚", "Login🔑", "DC"],
+            ["Support❤️", "Ping📡", "Status📊", "Maintainers😎"]
+
+        ],
+        resize_keyboard=True
+    )
 else:
-            buttonz=ReplyKeyboardMarkup(
-            [
-                ["Start⚡️","Help📚","DC"],
-                ["Support❤️","Ping📡","Status📊","Maintainers😎"]
-                        
-            ],
-            resize_keyboard=True
-        )
+    buttonz = ReplyKeyboardMarkup(
+        [
+            ["Start⚡️", "Help📚", "DC"],
+            ["Support❤️", "Ping📡", "Status📊", "Maintainers😎"]
+
+        ],
+        resize_keyboard=True
+    )
 
 
-@StreamBot.on_message((filters.command("start") | filters.regex('Start⚡️')) & filters.private )
+@StreamBot.on_message((filters.command("start") | filters.regex('Start⚡️')) & filters.private)
 async def start(b, m):
     if not await db.is_user_exist(m.from_user.id):
         await db.add_user(m.from_user.id, m.from_user.first_name, m.from_user.last_name, m.from_user.username)
@@ -51,35 +51,36 @@ async def start(b, m):
                 )
                 return
         except UserNotParticipant:
-             await StreamBot.send_photo(
+            await StreamBot.send_photo(
                 chat_id=m.chat.id,
                 photo="https://telegra.ph/file/9d94fc0af81234943e1a9.jpg",
                 caption="<i>𝙹𝙾𝙸𝙽 CHANNEL 𝚃𝙾 𝚄𝚂𝙴 𝙼𝙴🔐</i>",
                 reply_markup=InlineKeyboardMarkup(
                     [
                         [
-                            InlineKeyboardButton("Jᴏɪɴ ɴᴏᴡ 🔓", url=f"https://t.me/{Var.UPDATES_CHANNEL}")
+                            InlineKeyboardButton(
+                                "Jᴏɪɴ ɴᴏᴡ 🔓", url=f"https://t.me/{Var.UPDATES_CHANNEL}")
                         ]
                     ]
                 ),
-                
+
             )
-             return
+            return
         except Exception:
             await b.send_message(
                 chat_id=m.chat.id,
                 text="<i>𝓢𝓸𝓶𝓮𝓽𝓱𝓲𝓷𝓰 𝔀𝓮𝓷𝓽 𝔀𝓻𝓸𝓷𝓰</i> <b> <a href='https://github.com/adarsh-goel'>CLICK HERE FOR SUPPORT </a></b>",
-                
+
                 disable_web_page_preview=True)
             return
     await StreamBot.send_photo(
         chat_id=m.chat.id,
-        photo ="https://telegra.ph/file/ca10e459bc6f48a4ad0f7.jpg",
-        caption =f'Hi {m.from_user.mention(style="md")}!,\nI am Telegram File to Link Generator Bot with Channel support.\nSend me any file and get a direct download link and streamable link.!',
+        photo="https://telegra.ph/file/ca10e459bc6f48a4ad0f7.jpg",
+        caption=f'Hi {m.from_user.mention(style="md")}!,\nI am Telegram File to Link Generator Bot with Channel support.\nSend me any file and get a direct download link and streamable link.!',
         reply_markup=buttonz)
 
 
-@StreamBot.on_message((filters.command("help") | filters.regex('Help📚')) & filters.private )
+@StreamBot.on_message((filters.command("help") | filters.regex('Help📚')) & filters.private)
 async def help_handler(bot, message):
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name, message.from_user.last_name, message.from_user.username)
@@ -94,7 +95,7 @@ async def help_handler(bot, message):
                 await bot.send_message(
                     chat_id=message.chat.id,
                     text=f"<i>Sᴏʀʀʏ Sɪʀ, Yᴏᴜ ᴀʀᴇ Bᴀɴɴᴇᴅ FROM USING ᴍᴇ. Cᴏɴᴛᴀᴄᴛ the [Server Owner](tg://user?id={Var.OWNER_ID[0]})</i>",
-                    
+
                     disable_web_page_preview=True
                 )
                 return
@@ -106,11 +107,12 @@ async def help_handler(bot, message):
                 reply_markup=InlineKeyboardMarkup(
                     [
                         [
-                            InlineKeyboardButton("🤖 Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ", url=f"https://t.me/{Var.UPDATES_CHANNEL}")
+                            InlineKeyboardButton(
+                                "🤖 Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ", url=f"https://t.me/{Var.UPDATES_CHANNEL}")
                         ]
                     ]
                 ),
-                
+
             )
             return
         except Exception:
@@ -120,14 +122,15 @@ async def help_handler(bot, message):
                 disable_web_page_preview=True)
             return
     await message.reply_text(
-        text="""<b>Send me any file or video I will give you streamable link and download link.</b>\n"""\
-             """<b>I also support Channels, Add me to you Channel and send any media files and see miracle✨ Also send /list to know all commands.\nAdmins could use /admin to see admin's commands list.\n\n"""\
+        text="""<b>Send me any file or video I will give you streamable link and download link.</b>\n"""
+             """<b>I also support Channels, Add me to you Channel and send any media files and see miracle✨ Also send /list to know all commands.\nAdmins could use /admin to see admin's commands list.\n\n"""
              """<b>Don't Forget to use /support .😉</b>""",
-        
+
         disable_web_page_preview=True,
         reply_markup=InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("💁‍♂️ Server Owner", url=f"tg://user?id={Var.OWNER_ID[0]}")],
+                [InlineKeyboardButton(
+                    "💁‍♂️ Server Owner", url=f"tg://user?id={Var.OWNER_ID[0]}")],
                 # [InlineKeyboardButton("💥 Source Code", url="https://github.com/adarsh-goel/-pro/")]
             ]
         )

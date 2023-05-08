@@ -2,7 +2,7 @@
 import os
 from os import getenv, environ
 from dotenv import load_dotenv
-
+from Adarsh.utils.human_readable import human_read_to_byte
 
 
 load_dotenv()
@@ -41,3 +41,5 @@ class Var(object):
     BANNED_CHANNELS = list(set(int(x) for x in str(getenv("BANNED_CHANNELS", "-1001362659779")).split()))
     EXPIRE_TIME = str(getenv('EXPIRE_TIME'))
     MY_PASS = str(os.environ.get("MY_PASS", None))
+    DAILY_LIMIT_FILE = int(os.environ.get("DAILY_LIMIT", 10))
+    DAILY_LIMIT_DOWNLOAD = human_read_to_byte(str(os.environ.get("DAILY_LIMIT_DOWNLOAD", '2GB')))
