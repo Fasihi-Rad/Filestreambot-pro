@@ -22,12 +22,12 @@ async def maintainers(b,m):
     except Exception:
                 await b.send_message(
                     chat_id=m.chat.id,
-                    text=f"<b>Coded By [Adarsh Goel](https://github.com/adarsh-goel)\nModified By [Server Owner](tg://user?id={Var.OWNER_ID[0]})</b>",
+                    text=f"<b>Coded By [Amir.r Fasihi.r](https://github.com/Fasihi-Rad)\nThe [Server Owner](tg://user?id={Var.OWNER_ID[0]})</b>",
                     
                     reply_markup=InlineKeyboardMarkup(
                         [
                             [
-                                InlineKeyboardButton("Developer💻", url=f"https://github.com/adarsh-goel")
+                                InlineKeyboardButton("Developer💻", url=f"https://github.com/Fasihi-Rad")
                             ]
                         ]
                     ),
@@ -113,9 +113,10 @@ async def stats(bot, update):
                 f'<b>Disk:</b> {disk}%'
         await update.reply_text(botstats)
     else:
+        await db.update_user_link_limit(user_id)
         user = await db.user_info(user_id)
         botstats = f'<b>Bot Uptime:</b> {currentTime}\n\n' \
                 f'<b>Your Status:</b> `{user["status"]}`'\
                 f'<b>Totall Links Made (Today):</b> `{user["link_made"]}`\n' \
-                f'<b>Totall Download Size (Today):</b> `{byte_to_human_read(user["totall_download"])}`\n'
+                f'<b>Totall Download Size (Today):</b> `{byte_to_human_read(user["total_download"])}`\n'
         await update.reply_text(botstats)

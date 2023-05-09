@@ -1,4 +1,4 @@
-# (c) adarsh-goel
+# (c) Fasihi-Rad
 from pyrogram.types import ReplyKeyboardMarkup
 from Adarsh.utils.file_properties import get_name, get_hash, get_media_file_size
 from pyrogram.errors import UserNotParticipant
@@ -12,24 +12,15 @@ import logging
 logger = logging.getLogger(__name__)
 db = Database(Var.DATABASE_URL, Var.NAME)
 
-if Var.MY_PASS:
-    buttonz = ReplyKeyboardMarkup(
-        [
-            ["Start⚡️", "Help📚", "Login🔑", "DC"],
-            ["Support❤️", "Ping📡", "Status📊", "Maintainers😎"]
 
-        ],
-        resize_keyboard=True
-    )
-else:
-    buttonz = ReplyKeyboardMarkup(
-        [
-            ["Start⚡️", "Help📚", "DC"],
-            ["Support❤️", "Ping📡", "Status📊", "Maintainers😎"]
+buttonz = ReplyKeyboardMarkup(
+    [
+        ["Start⚡️", "Help📚", "Login🔑", "DC"],
+        ["Support❤️", "Ping📡", "Status📊", "Maintainers😎"]
 
-        ],
-        resize_keyboard=True
-    )
+    ],
+    resize_keyboard=True
+)
 
 
 @StreamBot.on_message((filters.command("start") | filters.regex('Start⚡️')) & filters.private)
@@ -69,15 +60,24 @@ async def start(b, m):
         except Exception:
             await b.send_message(
                 chat_id=m.chat.id,
-                text="<i>𝓢𝓸𝓶𝓮𝓽𝓱𝓲𝓷𝓰 𝔀𝓮𝓷𝓽 𝔀𝓻𝓸𝓷𝓰</i> <b> <a href='https://github.com/adarsh-goel'>CLICK HERE FOR SUPPORT </a></b>",
+                text="<i>𝓢𝓸𝓶𝓮𝓽𝓱𝓲𝓷𝓰 𝔀𝓮𝓷𝓽 𝔀𝓻𝓸𝓷𝓰</i> <b> <a href='https://github.com/Fasihi-Rad'>CLICK HERE FOR SUPPORT </a></b>",
 
                 disable_web_page_preview=True)
             return
-    await StreamBot.send_photo(
-        chat_id=m.chat.id,
-        photo="https://telegra.ph/file/ca10e459bc6f48a4ad0f7.jpg",
-        caption=f'Hi {m.from_user.mention(style="md")}!,\nI am Telegram File to Link Generator Bot with Channel support.\nSend me any file and get a direct download link and streamable link.!',
-        reply_markup=buttonz)
+    if not Var.PERIVEAT :
+        await StreamBot.send_photo(
+            chat_id=m.chat.id,
+            photo="https://telegra.ph/file/ca10e459bc6f48a4ad0f7.jpg",
+            caption=f'Hi {m.from_user.mention(style="md")}!,\nI am Telegram File to Link Generator Bot with Channel support.\n'\
+                    f'Send me any file and get a direct download link and streamable link.!\n\n <b>If you are not Subscribed, You could download {Var.DAILY_LIMIT_FILE} files total {byte_to_human_read(Var.DAILY_LIMIT_DOWNLOAD)} size.</b>',
+            reply_markup=buttonz)
+    else:
+        await StreamBot.send_photo(
+            chat_id=m.chat.id,
+            photo="https://telegra.ph/file/ca10e459bc6f48a4ad0f7.jpg",
+            caption=f'Hi {m.from_user.mention(style="md")}!,\nI am Telegram File to Link Generator Bot with Channel support.\n'\
+                    f'Send me any file and get a direct download link and streamable link.!\n',
+            reply_markup=buttonz)
 
 
 @StreamBot.on_message((filters.command("help") | filters.regex('Help📚')) & filters.private)
@@ -121,17 +121,32 @@ async def help_handler(bot, message):
                 text=f"__Sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ Wʀᴏɴɢ. Cᴏɴᴛᴀᴄᴛ the__ [Server Owner](tg://user?id={Var.OWNER_ID[0]}).",
                 disable_web_page_preview=True)
             return
-    await message.reply_text(
-        text="""<b>Send me any file or video I will give you streamable link and download link.</b>\n"""
-             """<b>I also support Channels, Add me to you Channel and send any media files and see miracle✨ Also send /list to know all commands.\nAdmins could use /admin to see admin's commands list.\n\n"""
-             """<b>Don't Forget to use /support .😉</b>""",
+    if not Var.PERIVEAT :
+        await message.reply_text(
+            text=f"""<b>Send me any file or video I will give you streamable link and download link.</b>\n"""
+                f"""<b>If you are not Subscribed, You could download {Var.DAILY_LIMIT_FILE} files total {byte_to_human_read(Var.DAILY_LIMIT_DOWNLOAD)} size.</b>"""
+                """<b>I also support Channels, Add me to you Channel and send any media files and see miracle✨ Also send /list to know all commands.\nAdmins could use /admin to see admin's commands list.\n\n"""
+                """<b>Don't Forget to use /support .😉</b>""",
 
-        disable_web_page_preview=True,
-        reply_markup=InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton(
-                    "💁‍♂️ Server Owner", url=f"tg://user?id={Var.OWNER_ID[0]}")],
-                # [InlineKeyboardButton("💥 Source Code", url="https://github.com/adarsh-goel/-pro/")]
-            ]
+            disable_web_page_preview=True,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton("💁‍♂️ Server Owner", url=f"tg://user?id={Var.OWNER_ID[0]}")],
+                    [InlineKeyboardButton("💥 Source Code", url="https://github.com/Fasihi-Rad/Filestreambot-pro/")]
+                ]
+            )
         )
-    )
+    else:
+        await message.reply_text(
+            text=f"""<b>Send me any file or video I will give you streamable link and download link.</b>\n"""
+                """<b>I also support Channels, Add me to you Channel and send any media files and see miracle✨ Also send /list to know all commands.\nAdmins could use /admin to see admin's commands list.\n\n"""
+                """<b>Don't Forget to use /support .😉</b>""",
+
+            disable_web_page_preview=True,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton("💁‍♂️ Server Owner", url=f"tg://user?id={Var.OWNER_ID[0]}")],
+                    [InlineKeyboardButton("💥 Source Code", url="https://github.com/Fasihi-Rad/Filestreambot-pro/")]
+                ]
+            )
+        )

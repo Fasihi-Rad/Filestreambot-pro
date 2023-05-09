@@ -1,5 +1,4 @@
-# (c) adarsh-goel
-
+# (c) Fasihi-Rad
 
 import time
 StartTime = time.time()

@@ -1,4 +1,4 @@
-# (c) adarsh-goel
+# (c) Fasihi-Rad
 
 import asyncio
 import logging

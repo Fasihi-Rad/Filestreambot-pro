@@ -1,4 +1,4 @@
-# (c) @adarsh-goel
+# (c) @Fasihi-Rad
 import os
 import time
 import string
@@ -79,7 +79,7 @@ async def sts(c: Client, m: Message):
                 f'<b>Telegram Username:</b> `{user["telegram_username"]}`\n' \
                 f'<b>Status:</b> `{user["status"]}`\n' \
                 f'<b>Today Links Made:</b> `{user["link_made"]}`\n' \
-                f'<b>Today Download Size:</b> `{byte_to_human_read(user["totall_download"])}`\n' \
+                f'<b>Today Download Size:</b> `{byte_to_human_read(user["total_download"])}`\n' \
                 f'<b>Join Date:</b> `{user["join_date"]}`\n'
             await m.reply_text(botstats)
         

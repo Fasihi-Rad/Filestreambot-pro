@@ -1,11 +1,11 @@
-![GitHub contributors](https://img.shields.io/github/contributors/adarsh-goel/filestreambot-pro?style=flat&color=green)
-![GitHub repo size](https://img.shields.io/github/repo-size/adarsh-goel/filestreambot-pro?color=green)
-![GitHub](https://img.shields.io/github/license/adarsh-goel/filestreambot-pro?color=green)
+![GitHub contributors](https://img.shields.io/github/contributors/Fasihi-Rad/filestreambot-pro?style=flat&color=green)
+![GitHub repo size](https://img.shields.io/github/repo-size/Fasihi-Rad/filestreambot-pro?color=green)
+![GitHub](https://img.shields.io/github/license/Fasihi-Rad/filestreambot-pro?color=green)
 
 
 <h1 align="center"></h1>
 <p align="center"> 
-  <img src="https://socialify.git.ci/adarsh-goel/filestreambot-pro/image?description=1&descriptionEditable=A%20very%20fast%20file%20streaming%20bot%20used%20for%20streaming%20and%20downloading%20movies&font=Source%20Code%20Pro&forks=1&issues=1&language=1&logo=https%3A%2F%2Fuser-images.githubusercontent.com%2F88939380%2F137127129-a86fc939-2931-4c66-b6f6-b57711a9eab7.png&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Dark" alt="Cover Image" width="650">
+  <img src="https://socialify.git.ci/Fasihi-Rad/filestreambot-pro/image?description=1&descriptionEditable=A%20very%20fast%20file%20streaming%20bot%20used%20for%20streaming%20and%20downloading%20movies&font=Source%20Code%20Pro&forks=1&issues=1&language=1&logo=https%3A%2F%2Fuser-images.githubusercontent.com%2F88939380%2F137127129-a86fc939-2931-4c66-b6f6-b57711a9eab7.png&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Dark" alt="Cover Image" width="650">
   </a>
   
  <p align="center">
@@ -13,16 +13,15 @@
     <br />
    </strong></a>
     <br />
-    <a href="https://github.com/adarsh-goel/pro/issues">Report a Bug</a>
+    <a href="https://github.com/Fasihi-Rad/pro/issues">Report a Bug</a>
     |
-    <a href="https://github.com/adarsh-goel/filestreambot-pro/issues">Request Feature</a>
+    <a href="https://github.com/Fasihi-Rad/filestreambot-pro/issues">Request Feature</a>
   </p>
 
 
 <hr>
 
 ## Please Follow me so you know whenever I release a new Project!❤️‍🔥
-### Incase you are having trouble deploying bot you may hire developer we have reasonable rates [click here](https://t.me/+KvjFjOWicuZmOTQx)
 
 ## 🍁 About This Bot :
 
@@ -30,7 +29,8 @@
 
 </p>
 <p align='center'>
-    This bot will give you stream links for Telegram files without the need of waiting till the download completes
+    This bot will give you stream links for Telegram files without the need of waiting till the download completes.
+    <br><b>The original bot missing some useful Features, so I added myself.</b>
 </p>
 
 
@@ -41,7 +41,6 @@
 <br>
 <details>
   <summary><b>Deploy on Heroku:</b></summary>
-
 
 1. Fork This Repo
 2. Click on the button to Deploy and follow steps
@@ -54,17 +53,12 @@ Either you could locally host or deploy on [Heroku](https://heroku.com)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy/)
 
-<br>
-
-
-then goto the <a href="#mandatory-vars">variables tab</a> for more info on setting up environmental variables. </details>
+then goto the <a href="#mandatory-vars">variables tab</a> for more info on setting up environmental variables.
+</details>
 
 <details>
-  <summary><b>Features:</b></summary>
-  
-<p>
+  <summary><b>🚀Features :</b></summary>
 
-🚀Features<p>
 💥Superfast⚡️ download and stream links.<br>
 💥No ads in generated links.<br>
 💥Superfast interface.<br>
@@ -75,17 +69,20 @@ then goto the <a href="#mandatory-vars">variables tab</a> for more info on setti
 💥User Freindly Interface.<br>
 💥Ping check.<br>
 💥User DC Check.<br>
-💥Real time CPU , RAM , Internet usage. <br>
-💥Custom Domain support. <br>
 💥All unwanted code removed. <br>
-💥A lot more tired of writing check out by deploying it. 
+💥Custom Domain support. <br>
+🆕Useful Admin comments. Use `/admin` .<br>
+🆕Admins Could ban users, now.<br>
+🆕Now We have plan for Free or Subscribed users.<br>
+🆕You Could add daily Limit for total download size and number of files. (Free Users only)<br>
+🆕Real time CPU, RAM, Internet usage For Admins.<br>
 </details>
 <details>
   <summary><b>Host it on VPS Locally :</b></summary>
 
 
 ```py
-git clone https://github.com/adarsh-goel/filestreambot-pro
+git clone https://github.com/Fasihi-Rad/filestreambot-pro
 cd filestreambot-pro
 virtualenv -p /usr/bin/python3 venv
 . ./venv/bin/activate
@@ -111,6 +108,7 @@ PORT=8080
 FQDN=your_server_ip
 OWNER_ID=your_user_id
 DATABASE_URL=mongodb_uri
+DAILY_LIMIT_DOWNLOAD=
 ```
   </details>
 
@@ -120,8 +118,10 @@ DATABASE_URL=mongodb_uri
 `API_ID` : Goto [my.telegram.org](https://my.telegram.org) to obtain this.
 
 `API_HASH` : Goto [my.telegram.org](https://my.telegram.org) to obtain this.
-  
-`MY_PASS` : Bot PASSWORD
+
+`PERIVEAT` : If True only Subscribed User could use the bot, <b>Don't Forget To add `SUB_PASS`</b>. Defaults to `True`.<br>
+
+`SUB_PASS` : Bot PASSWORD For the subscribed User.
 
 `BOT_TOKEN` : Get the bot token from [@BotFather](https://telegram.dog/BotFather)
 
@@ -151,14 +151,23 @@ DATABASE_URL=mongodb_uri
 
 `NO_PORT` : If you don't want your port to be displayed. You should point your `PORT` to `80` (http) or `443` (https) for the links to work. Ignore this if you're on Heroku.
 
-`FQDN` :  A Fully Qualified Domain Name if present. Defaults to `WEB_SERVER_BIND_ADDRESS` </details>
+`FQDN` :  A Fully Qualified Domain Name if present. Defaults to `WEB_SERVER_BIND_ADDRESS` 
 
+`DAILY_LIMIT_DOWNLOAD` : Daily Limit for total downloads, Defaults to `2GB`. <b>Only When `PERIVEAT=False`</b>.
+
+`DAILY_LIMIT_FILE` : Daily Limit for files download, Defaults to `5` <b>Only When `PERIVEAT=False`</b>.
+
+</details>
 <details>
   <summary><b>How to Use :</b></summary>
 
 :warning: **Before using the  bot, don't forget to add the bot to the `BIN_CHANNEL` as an Admin**
- 
+
 `/start` : To check if the bot is alive or not.
+
+`/admin` : To see all Admin commands.
+
+`/list` : To see all commands.
 
 To get an instant stream link, just forward any media to the bot and boom, its fast af.
   
@@ -170,5 +179,6 @@ Bot also Supported with Channels. Just add bot Channel as Admin. If any new file
 
 ### Credits : 
 
-- [Me](https://github.com/adarsh-goel)
+- [ME](https://github.com/Fasihi-Rad)
+- [Orginal Repository](https://github.com/adarsh-goel)
 - Everyone In This Journey !

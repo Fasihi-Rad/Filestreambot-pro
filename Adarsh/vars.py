@@ -1,9 +1,14 @@
-# (c) adarsh-goel
+# (c) Fasihi-Rad
 import os
 from os import getenv, environ
 from dotenv import load_dotenv
-from Adarsh.utils.human_readable import human_read_to_byte
+from Adarsh.utils.file_size import human_read_to_byte
 
+def my_bool(string):
+    if string == "True":
+        return True
+    elif string == "False":
+        return False      
 
 load_dotenv()
 
@@ -20,7 +25,7 @@ class Var(object):
     BIND_ADRESS = str(getenv('WEB_SERVER_BIND_ADDRESS', '0.0.0.0'))
     PING_INTERVAL = int(environ.get("PING_INTERVAL", "1200"))  # 20 minutes
     OWNER_ID = list(int(x) for x in os.environ.get("OWNER_ID", "").split())
-    NO_PORT = bool(getenv('NO_PORT', False))
+    NO_PORT = my_bool(getenv('NO_PORT', 'False'))
     APP_NAME = None
     OWNER_USERNAME = str(getenv('OWNER_USERNAME'))
     if 'DYNO' in environ:
@@ -30,7 +35,7 @@ class Var(object):
     else:
         ON_HEROKU = False
     FQDN = str(getenv('FQDN', BIND_ADRESS)) if not ON_HEROKU or getenv('FQDN') else APP_NAME+'.herokuapp.com'
-    HAS_SSL=bool(getenv('HAS_SSL',False))
+    HAS_SSL = my_bool(getenv('HAS_SSL','False'))
     if HAS_SSL:
         URL = "https://{}/".format(FQDN)
     else:
@@ -39,7 +44,7 @@ class Var(object):
     DATABASE_URL = str(getenv('DATABASE_URL'))
     UPDATES_CHANNEL = str(getenv('UPDATES_CHANNEL', None))
     BANNED_CHANNELS = list(set(int(x) for x in str(getenv("BANNED_CHANNELS", "-1001362659779")).split()))
-    EXPIRE_TIME = str(getenv('EXPIRE_TIME'))
-    MY_PASS = str(os.environ.get("MY_PASS", None))
-    DAILY_LIMIT_FILE = int(os.environ.get("DAILY_LIMIT", 10))
-    DAILY_LIMIT_DOWNLOAD = human_read_to_byte(str(os.environ.get("DAILY_LIMIT_DOWNLOAD", '2GB')))
+    PERIVEAT = my_bool(getenv("PERIVEAT", 'True'))
+    SUB_PASS = str(getenv("SUB_PASS", None))
+    DAILY_LIMIT_FILE = int(getenv("DAILY_LIMIT_FILE", 5))
+    DAILY_LIMIT_DOWNLOAD = human_read_to_byte(str(getenv("DAILY_LIMIT_DOWNLOAD", '4GB')))

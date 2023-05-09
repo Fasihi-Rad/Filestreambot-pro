@@ -1,4 +1,4 @@
-# (c) Adarsh-Goel
+# (c) Fasihi-Rad
 import os
 import asyncio
 from asyncio import TimeoutError
@@ -11,7 +11,7 @@ from pyrogram import filters, Client
 from pyrogram.errors import FloodWait, UserNotParticipant
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from Adarsh.utils.file_properties import get_name, get_hash, get_media_file_size
-
+from os import getenv
 db = Database(Var.DATABASE_URL, Var.NAME)
 
 
@@ -31,7 +31,7 @@ async def login_handler(c: Client, m: Message):
         except TimeoutError:
             await ag.edit("I can't wait more for password, try again")
             return
-        if textp == Var.MY_PASS:
+        if textp == Var.SUB_PASS:
             await db.login_user(m.chat.id, m.chat.first_name, m.chat.last_name, m.chat.username)
             await m.reply_text("Password is correct")
         else:
@@ -49,10 +49,10 @@ async def private_receive_handler(c: Client, m: Message):
             f"New User Joined! : \n\n Name : [{m.from_user.first_name}](tg://user?id={m.from_user.id}) Started Your Bot!!"
         )
 
-    # if Var.MY_PASS:
-    #     if await db.check_user_status(m.chat.id) == 'free':
-    #         await m.reply_text(f"<b>Login first using /login cmd</b> \n Don't know the pass? request it from the [Server Owner](tg://user?id={Var.OWNER_ID[0]})")
-    #         return
+    if Var.PERIVEAT:
+        if await db.check_user_status(m.chat.id) == 'free':
+            await m.reply_text(f"<b>Login first using /login cmd</b> \nDon't know the pass? request it from the [Server Owner](tg://user?id={Var.OWNER_ID[0]})")
+            return
 
     if await db.check_user_status(m.chat.id) == 'banned':
         await c.send_message(
@@ -62,13 +62,22 @@ async def private_receive_handler(c: Client, m: Message):
         )
         return
 
-    if not await db.check_user_link_limit(m.chat.id):
-        await c.send_message(
-            chat_id=m.chat.id,
-            text=f"Your daily limit is over \n Try Tomorrow!",
-            disable_web_page_preview=True
-        )
-        return
+    if not Var.PERIVEAT:
+        valid = await db.check_user_link_limit(m.chat.id, get_media_file_size(m))
+        if valid == False:
+            await c.send_message(
+                chat_id=m.chat.id,
+                text=f"Your daily limit is over \nTry Tomorrow!\nUse `/help` for more info\n",
+                disable_web_page_preview=True
+            )
+            return
+        elif valid == 2:
+            await c.send_message(
+                chat_id=m.chat.id,
+                text=f"It's Too big, it's should be under {byte_to_human_read(Var.DAILY_LIMIT_DOWNLOAD)} .\nUse `/help` for more info.",
+                disable_web_page_preview=True
+            )
+            return
 
     if Var.UPDATES_CHANNEL != "None":
         try:
@@ -134,7 +143,8 @@ async def private_receive_handler(c: Client, m: Message):
 
 @StreamBot.on_message(filters.channel & ~filters.group & (filters.document | filters.video | filters.photo) & ~filters.forwarded, group=-1)
 async def channel_receive_handler(bot, broadcast):
-    if Var.MY_PASS:
+    
+    if Var.PERIVEAT:
         if await db.check_user_status(broadcast.chat.id) == 'free':
             await broadcast.reply_text("<b>Login first using /login cmd</b> \n Don't know the pass? request it from the Developer")
             return
@@ -143,13 +153,22 @@ async def channel_receive_handler(bot, broadcast):
         await bot.leave_chat(broadcast.chat.id)
         return
 
-    if not await db.check_user_link_limit(broadcast.chat.id):
-        await broadcast.send_message(
-            chat_id=broadcast.chat.id,
-            text=f"Your daily limit is over \n Try Tomorrow!",
-            disable_web_page_preview=True
-        )
-        return
+    if not Var.PERIVEAT:
+        valid = await db.check_user_link_limit(broadcast.chat.id, get_media_file_size(broadcast))
+        if  valid == False:
+            await broadcast.send_message(
+                chat_id=broadcast.chat.id,
+                text=f"Your daily limit is over \nTry Tomorrow!\nUse `/help` for more info\n",
+                disable_web_page_preview=True
+            )
+            return
+        elif valid == 2:
+            await broadcast.send_message(
+                chat_id=broadcast.chat.id,
+                text=f"It's Too big, it's should be under {byte_to_human_read(Var.DAILY_LIMIT_DOWNLOAD)} .\nUse `/help` for more info.",
+                disable_web_page_preview=True
+            )
+            return
 
     try:
         log_msg = await broadcast.forward(chat_id=Var.BIN_CHANNEL)
