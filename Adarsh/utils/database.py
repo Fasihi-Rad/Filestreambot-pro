@@ -67,6 +67,7 @@ class Database:
         await self.col.update_one({'id': int(id)}, {'$set': {'total_download': user['total_download']+size }})
     
     async def user_info(self, id):
+        user = False
         user = await self.col.find_one({'id': int(id)})
         return user
     
@@ -86,7 +87,7 @@ class Database:
     async def update_user_link_limit(self, id):
         user = await self.col.find_one({'id': int(id)})
         if user['link_date'] == datetime.date.today().isoformat():
-            pass
+            return
         else:
             await self.user_link_count_zero(id)
             await self.user_link_size_zero(id)

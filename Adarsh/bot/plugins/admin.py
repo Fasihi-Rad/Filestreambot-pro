@@ -72,15 +72,19 @@ async def sts(c: Client, m: Message):
         userinfo_ids = re.findall(r"([\d]+)", m.text)
         await m.reply_text(text=f"<b>It's may take several moment !</b>", quote=True)
         for userinfo_id in userinfo_ids:
+            await db.update_user_link_limit(userinfo_id)
             user = await db.user_info(userinfo_id)
-            botstats = f'<b>User [{user["name"]}](tg://user?id={userinfo_ids}) Info : </b> \n\n' \
-                f'<b>Telegram ID:` {user["id"]}`</b>\n' \
-                f'<b>Name:</b> `{user["name"]}`\n' \
-                f'<b>Telegram Username:</b> `{user["telegram_username"]}`\n' \
-                f'<b>Status:</b> `{user["status"]}`\n' \
-                f'<b>Today Links Made:</b> `{user["link_made"]}`\n' \
-                f'<b>Today Download Size:</b> `{byte_to_human_read(user["total_download"])}`\n' \
-                f'<b>Join Date:</b> `{user["join_date"]}`\n'
+            if user:
+                botstats = f'<b>User [{user["name"]}](tg://user?id={userinfo_ids}) Info : </b> \n\n' \
+                    f'<b>Telegram ID:` {user["id"]}`</b>\n' \
+                    f'<b>Name:</b> `{user["name"]}`\n' \
+                    f'<b>Telegram Username:</b> `{user["telegram_username"]}`\n' \
+                    f'<b>Status:</b> `{user["status"]}`\n' \
+                    f'<b>Today Links Made:</b> `{user["link_made"]}`\n' \
+                    f'<b>Today Download Size:</b> `{byte_to_human_read(user["total_download"])}`\n' \
+                    f'<b>Join Date:</b> `{user["join_date"]}`\n'
+            else:
+                botstats = f"User {userinfo_id} dosen't exist."
             await m.reply_text(botstats)
         
 @StreamBot.on_message(filters.command("broadcast") & filters.private  & filters.user(list(Var.OWNER_ID)))
