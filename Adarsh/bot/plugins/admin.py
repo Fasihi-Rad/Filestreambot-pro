@@ -22,7 +22,7 @@ Broadcast_IDs = {}
 async def sts(c: Client, m: Message):
     user_id=m.from_user.id
     if user_id in Var.OWNER_ID:
-        LIST_MSG = "Hi ! {} Here is a list of all Admin commands \n \n 1 . `/Admin` \n 2. `/users` : Display The Number of Users \n 3. `/userslist` : Display The Names of All Users \n 4. `/deluser` __ID__ : Delete The User \n 5. `/banuser` __ID__ : Ban The User \n 6. `/Status📊` \n 7. `/userinfo` __ID__ : Display The User Info \n 8. `/broadcast` "
+        LIST_MSG = "Hi ! {} Here is a list of all Admin commands \n \n 1 . `/Admin` \n 2. `/users` : Display The Number of Users \n 3. `/userslist` : Display The Names of All Users \n 4. `/deluser` __ID__ : Delete The User \n 5. `/banuser` __ID__ : Ban The User \n 6. `/Status📊` \n 7. `/userinfo` __ID__ : Display The User Info \n 8. `/broadcast` \n 8. `/cus` __ID__ __STATUS__ : Change user status"
         await c.send_message(chat_id = m.chat.id,
             text = LIST_MSG.format(m.from_user.mention(style="md"))
         )
@@ -63,7 +63,21 @@ async def sts(c: Client, m: Message):
         await m.reply_text(text=f"<b>It's may take several moment !</b> \n Users : {banuser_ids} ", quote=True)
         for banuser_id in banuser_ids:
             await db.ban_user(banuser_id)
-            await m.reply_text(text=f"<b>User [{banuser_id}](tg://user?id={banuser_ids}) banned.</b>", quote=True)
+            await m.reply_text(text=f"<b>User [{banuser_id}](tg://user?id={banuser_id}) banned.</b>", quote=True)
+
+@StreamBot.on_message(filters.command("cus") & filters.private )
+async def sts(c: Client, m: Message):
+    user_id=m.from_user.id
+    if user_id in Var.OWNER_ID:
+        user_ids = re.findall(r"([\d]+)", m.text)
+        new_status = re.findall(r"(subscribed|free|banned)", m.text)
+        if new_status[0] == "banned" or new_status[0] == "subscribed" or new_status[0] == "free":
+            await m.reply_text(text=f"<b>You want to chenge this user status</b>\nUsers : {user_ids}\nTo Status : {new_status[0]}", quote=True,)
+            for user_id in user_ids:
+                await db.change_user_status(user_id, new_status[0])
+                await m.reply_text(text=f"<b>User [{user_id}](tg://user?id={user_ids}) status change to {new_status[0]}.</b>", quote=True)
+        else:
+            await m.reply_text(text=f"<b>Wrong Status</b>\n<b>Status : `banned` `subscribed` `free`</b>\nTry again !", quote=True)
 
 @StreamBot.on_message(filters.command("userinfo") & filters.private )       
 async def sts(c: Client, m: Message):

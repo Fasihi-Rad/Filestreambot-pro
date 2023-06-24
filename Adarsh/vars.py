@@ -8,7 +8,7 @@ def my_bool(string):
     if string == "True":
         return True
     elif string == "False":
-        return False      
+        return False
 
 load_dotenv()
 

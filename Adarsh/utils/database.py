@@ -57,6 +57,9 @@ class Database:
     
     async def ban_user(self, id):
         await self.col.update_one({'id': int(id)}, {'$set': {'status': 'banned'}})
+        
+    async def change_user_status(self, id, status):
+        await self.col.update_one({'id': int(id)}, {'$set': {'status': status}})
 
     async def increase_link(self, id):
         user = await self.col.find_one({'id': int(id)})
