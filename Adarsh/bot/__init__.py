@@ -24,7 +24,7 @@ StreamBot = Client(
     workdir="./session",
     plugins=dict(root="Adarsh.bot.plugins"),
     parse_mode=enums.ParseMode.HTML,  # Modern enum usage
-    max_concurrent_transmissions=config.max_concurrent_transmissions,
+    # max_concurrent_transmissions removed - not supported in this Pyrogram version
 )
 
 # Multi-client support

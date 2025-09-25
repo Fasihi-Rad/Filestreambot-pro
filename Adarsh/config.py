@@ -30,7 +30,7 @@ class BotConfig:
     name: str = "FileStreamBot"
     sleep_threshold: int = 60
     workers: int = 4
-    max_concurrent_transmissions: int = 4
+    # max_concurrent_transmissions removed - not supported in current Pyrogram version
     
     # Web server settings
     port: int = 8080
@@ -156,12 +156,17 @@ class BotConfig:
                 'TB': 1024 * 1024 * 1024 * 1024
             }
             
+            # Check for each suffix
             for suffix, multiplier in multipliers.items():
                 if size_str.endswith(suffix):
                     try:
-                        number = float(size_str[:-len(suffix)])
-                        return int(number * multiplier)
+                        # Extract the numeric part
+                        number_part = size_str[:-len(suffix)].strip()
+                        if number_part:  # Make sure there's a number
+                            number = float(number_part)
+                            return int(number * multiplier)
                     except ValueError:
+                        logger.warning(f"Invalid number in size format: {size_str}")
                         break
             
             # Try to parse as plain number (bytes)
@@ -186,7 +191,7 @@ class BotConfig:
             name=os.getenv('BOT_NAME', 'FileStreamBot'),
             sleep_threshold=get_int('SLEEP_THRESHOLD', 60),
             workers=get_int('WORKERS', 4),
-            max_concurrent_transmissions=get_int('MAX_CONCURRENT_TRANSMISSIONS', 4),
+            # max_concurrent_transmissions removed - not supported
             
             # Web server
             port=get_int('PORT', 8080),
@@ -201,13 +206,13 @@ class BotConfig:
             
             # Channel settings
             updates_channel=os.getenv('UPDATES_CHANNEL') if os.getenv('UPDATES_CHANNEL', 'None') != 'None' else None,
-            banned_channels=get_list_int('BANNED_CHANNELS', [-1001362659779]),
+            banned_channels=get_list_int('BANNED_CHANNELS'),
             private_mode=get_bool('PRIVATE_MODE', True),
             subscription_password=os.getenv('SUB_PASS') if os.getenv('SUB_PASS', 'None') != 'None' else None,
             
             # Limits
             daily_file_limit=get_int('DAILY_LIMIT_FILE', 5),
-            daily_download_limit=parse_size(os.getenv('DAILY_LIMIT_DOWNLOAD', '4GB')),
+            daily_download_limit=parse_size(os.getenv('DAILY_LIMIT_DOWNLOAD', '2GB')),  # Default to 2GB to match user's setting
             
             # Heroku
             on_heroku=on_heroku,
