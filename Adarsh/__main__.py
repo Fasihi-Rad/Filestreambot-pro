@@ -187,6 +187,23 @@ async def start_services() -> None:
         plugin_count = len(plugin_files)  # Count available plugin files
         logger.info(f"📚 Found {plugin_count} plugin files in Adarsh/bot/plugins/")
         
+        # Debug: Check if plugins directory exists and list files
+        import os
+        plugins_path = "Adarsh/bot/plugins"
+        if os.path.exists(plugins_path):
+            plugin_list = os.listdir(plugins_path)
+            logger.info(f"📂 Plugin files found: {plugin_list}")
+        else:
+            logger.error(f"❌ Plugins directory not found: {plugins_path}")
+        
+        # Test if bot handlers are registered
+        handler_count = len(StreamBot.dispatcher.groups)
+        logger.info(f"🎯 Registered handler groups: {handler_count}")
+        
+        # Wait for plugins to load
+        await asyncio.sleep(2)
+        logger.info("⏳ Waited 2 seconds for plugins to initialize...")
+        
         # Start keep-alive service if on Heroku
         if config.on_heroku:
             logger.info("💓 Starting keep-alive service...")

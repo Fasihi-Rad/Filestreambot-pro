@@ -14,6 +14,9 @@ from Adarsh.vars import Var
 logger = logging.getLogger(__name__)
 db = Database(Var.DATABASE_URL, Var.NAME)
 
+# Add startup logging to verify plugin loading
+logger.info("🔌 start_help.py plugin loaded successfully")
+
 
 buttonz = ReplyKeyboardMarkup(
     [
@@ -29,17 +32,18 @@ buttonz = ReplyKeyboardMarkup(
 async def start_handler(client: Client, message: Message) -> None:
     """Handle /start command and Start button"""
     try:
-        logger.info(f"Start command received from user {message.from_user.id} (@{message.from_user.username})")
+        logger.info(f"🎯 START: Start command received from user {message.from_user.id} (@{message.from_user.username})")
         
         # Test basic response first
         try:
             await message.reply_text("🤖 Bot is responding! Checking database connection...")
+            logger.info("✅ START: Basic response sent successfully")
         except Exception as e:
-            logger.error(f"Failed to send basic response: {e}")
+            logger.error(f"❌ START: Failed to send basic response: {e}")
             return
         
         if not await db.is_user_exist(message.from_user.id):
-            logger.info(f"Adding new user: {message.from_user.id}")
+            logger.info(f"👤 START: Adding new user: {message.from_user.id}")
             await db.add_user(
                 message.from_user.id, 
                 message.from_user.first_name, 
@@ -54,14 +58,20 @@ async def start_handler(client: Client, message: Message) -> None:
                     f"__Mʏ Nᴇᴡ Fʀɪᴇɴᴅ__ [{message.from_user.first_name}]"
                     f"(tg://user?id={message.from_user.id}) __Sᴛᴀʀᴛᴇᴅ Yᴏᴜʀ Bᴏᴛ !!__"
                 )
-                logger.info(f"Sent new user notification to channel {Var.BIN_CHANNEL}")
+                logger.info(f"📢 START: Sent new user notification to channel {Var.BIN_CHANNEL}")
             except Exception as e:
-                logger.error(f"Failed to send new user notification: {e}")
+                logger.error(f"❌ START: Failed to send new user notification: {e}")
         else:
-            logger.info(f"Existing user: {message.from_user.id}")
+            logger.info(f"👤 START: Existing user: {message.from_user.id}")
     except Exception as e:
-        logger.error(f"Failed to add new user {message.from_user.id}: {e}")
-        await message.reply_text("❌ Database error occurred. Check logs.")
+        logger.error(f"❌ START: Failed to add new user {message.from_user.id}: {e}")
+        try:
+            await message.reply_text("❌ Database error occurred. Check logs.")
+        except:
+            logger.error("❌ START: Could not even send error message")
+
+# Register the handler startup log
+logger.info("🎯 START handler registered successfully")
     # Check channel subscription if required
     if Var.UPDATES_CHANNEL != "None":
         try:
