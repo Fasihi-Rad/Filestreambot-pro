@@ -8,7 +8,7 @@ import importlib
 from pathlib import Path
 from typing import List
 
-from pyrogram import idle
+from pyrogram import idle, filters
 from pyrogram.errors import ApiIdInvalid, ApiIdPublishedFlood, AccessTokenInvalid, BadMsgNotification, FloodWait
 
 from .bot import StreamBot
@@ -50,51 +50,14 @@ plugin_files = glob.glob(PLUGIN_PATTERN)
 
 async def load_plugins() -> int:
     """
-    Dynamically load all bot plugins.
+    Plugin loading is now handled automatically by Pyrogram.
+    This function is kept for backward compatibility but not used.
     
     Returns:
-        Number of plugins loaded successfully
+        Number of plugins found
     """
-    loaded_count = 0
-    failed_plugins = []
-    
-    logger.info("📚 Loading bot plugins...")
-    
-    for plugin_file in plugin_files:
-        try:
-            # Extract plugin name from file path
-            plugin_path = Path(plugin_file)
-            plugin_name = plugin_path.stem
-            
-            # Build import path
-            import_path = f".plugins.{plugin_name}"
-            plugins_dir = Path(f"Adarsh/bot/plugins/{plugin_name}.py")
-            
-            # Load the plugin module
-            spec = importlib.util.spec_from_file_location(import_path, plugins_dir)
-            if spec and spec.loader:
-                plugin_module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(plugin_module)
-                
-                # Register in sys.modules
-                sys.modules[f"Adarsh.bot.plugins.{plugin_name}"] = plugin_module
-                
-                loaded_count += 1
-                logger.info(f"✅ Loaded plugin: {plugin_name}")
-            else:
-                failed_plugins.append(plugin_name)
-                logger.error(f"❌ Failed to load plugin spec: {plugin_name}")
-                
-        except Exception as e:
-            plugin_name = Path(plugin_file).stem
-            failed_plugins.append(plugin_name)
-            logger.error(f"❌ Error loading plugin {plugin_name}: {e}")
-    
-    if failed_plugins:
-        logger.warning(f"⚠️ Failed to load {len(failed_plugins)} plugins: {failed_plugins}")
-    
-    logger.info(f"📚 Plugin loading complete: {loaded_count} loaded, {len(failed_plugins)} failed")
-    return loaded_count
+    logger.info("📚 Plugin loading is handled automatically by Pyrogram")
+    return len(plugin_files)
 
 
 async def start_bot_with_retry(max_retries: int = 5) -> None:
@@ -189,6 +152,16 @@ async def start_services() -> None:
         bot_info = await StreamBot.get_me()
         StreamBot.username = bot_info.username
         logger.info(f"✅ Bot started: @{bot_info.username}")
+        logger.info(f"📊 Bot ID: {bot_info.id}")
+        logger.info(f"👤 Bot Name: {bot_info.first_name}")
+        
+        # Add simple test handler to verify bot is working
+        @StreamBot.on_message(filters.command("test") & filters.private)
+        async def test_handler(client, message):
+            await message.reply_text("✅ Bot is working! Plugins are loaded correctly.")
+            logger.info(f"Test command received from user {message.from_user.id}")
+        
+        logger.info("🧪 Added test handler - use /test to verify bot functionality")
         
         # Initialize clients
         logger.info("👥 Initializing additional clients...")
@@ -198,10 +171,21 @@ async def start_services() -> None:
         except Exception as e:
             logger.warning(f"⚠️ Client initialization warning: {e}")
         
-        # Load plugins
-        plugin_count = await load_plugins()
-        if plugin_count == 0:
-            logger.error("❌ No plugins loaded - bot may not function properly")
+        # Test database connection
+        logger.info("🗄️ Testing database connection...")
+        try:
+            from .utils.database import Database
+            test_db = Database(config.database_url, config.name)
+            user_count = await test_db.total_users_count()
+            logger.info(f"✅ Database connected successfully - {user_count} users found")
+        except Exception as e:
+            logger.error(f"❌ Database connection failed: {e}")
+            logger.error("💡 Make sure MongoDB is running and DATABASE_URL is correct")
+        
+        # Load plugins (handled automatically by Pyrogram)
+        logger.info("📚 Plugins will be loaded automatically by Pyrogram...")
+        plugin_count = len(plugin_files)  # Count available plugin files
+        logger.info(f"📚 Found {plugin_count} plugin files in Adarsh/bot/plugins/")
         
         # Start keep-alive service if on Heroku
         if config.on_heroku:

@@ -29,7 +29,17 @@ buttonz = ReplyKeyboardMarkup(
 async def start_handler(client: Client, message: Message) -> None:
     """Handle /start command and Start button"""
     try:
+        logger.info(f"Start command received from user {message.from_user.id} (@{message.from_user.username})")
+        
+        # Test basic response first
+        try:
+            await message.reply_text("🤖 Bot is responding! Checking database connection...")
+        except Exception as e:
+            logger.error(f"Failed to send basic response: {e}")
+            return
+        
         if not await db.is_user_exist(message.from_user.id):
+            logger.info(f"Adding new user: {message.from_user.id}")
             await db.add_user(
                 message.from_user.id, 
                 message.from_user.first_name, 
@@ -44,10 +54,14 @@ async def start_handler(client: Client, message: Message) -> None:
                     f"__Mʏ Nᴇᴡ Fʀɪᴇɴᴅ__ [{message.from_user.first_name}]"
                     f"(tg://user?id={message.from_user.id}) __Sᴛᴀʀᴛᴇᴅ Yᴏᴜʀ Bᴏᴛ !!__"
                 )
+                logger.info(f"Sent new user notification to channel {Var.BIN_CHANNEL}")
             except Exception as e:
                 logger.error(f"Failed to send new user notification: {e}")
+        else:
+            logger.info(f"Existing user: {message.from_user.id}")
     except Exception as e:
         logger.error(f"Failed to add new user {message.from_user.id}: {e}")
+        await message.reply_text("❌ Database error occurred. Check logs.")
     # Check channel subscription if required
     if Var.UPDATES_CHANNEL != "None":
         try:
