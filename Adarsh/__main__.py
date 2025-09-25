@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List
 
 from pyrogram import idle
-from pyrogram.errors import ApiIdInvalid, ApiIdPublishedFlood, AccessTokenInvalid
+from pyrogram.errors import ApiIdInvalid, ApiIdPublishedFlood, AccessTokenInvalid, BadMsgNotification, NetworkError, FloodWait
 
 from .bot import StreamBot
 from .vars import Var
@@ -97,14 +97,93 @@ async def load_plugins() -> int:
     return loaded_count
 
 
+async def start_bot_with_retry(max_retries: int = 5) -> None:
+    """
+    Start the bot with retry logic for connection issues.
+    
+    Args:
+        max_retries: Maximum number of connection attempts
+        
+    Raises:
+        Exception: If all retry attempts fail
+    """
+    for attempt in range(1, max_retries + 1):
+        try:
+            logger.info(f"🔄 Bot connection attempt {attempt}/{max_retries}...")
+            
+            if StreamBot.is_connected:
+                logger.info("✅ Bot already connected")
+                return
+            
+            # Clean up any existing connection issues
+            if hasattr(StreamBot, 'session') and StreamBot.session:
+                try:
+                    await StreamBot.session.stop()
+                except:
+                    pass  # Ignore cleanup errors
+                    
+            # Small delay to prevent rapid retries
+            if attempt > 1:
+                await asyncio.sleep(2)
+                
+            # Use async start method
+            await StreamBot.start()
+            
+            # Verify connection
+            if not StreamBot.is_connected:
+                raise ConnectionError("Bot failed to establish connection")
+                
+            logger.info("✅ Bot connection established")
+            return
+            
+        except BadMsgNotification as e:
+            logger.warning(f"⚠️ Telegram sync issue (attempt {attempt}): {e}")
+            logger.warning("💡 This usually indicates time synchronization or Telegram server issues")
+            if attempt < max_retries:
+                wait_time = min(2 ** attempt + 5, 30)  # Exponential backoff with base delay, max 30s
+                logger.info(f"⏳ Retrying in {wait_time} seconds...")
+                await asyncio.sleep(wait_time)
+            else:
+                logger.error("❌ Bot connection failed after all retries due to sync issues")
+                logger.error("🔧 Try running: sudo ntpdate -s time.nist.gov (Linux)")
+                raise
+                
+        except NetworkError as e:
+            logger.warning(f"⚠️ Network error (attempt {attempt}): {e}")
+            if attempt < max_retries:
+                wait_time = min(2 ** attempt, 30)
+                logger.info(f"⏳ Retrying in {wait_time} seconds...")
+                await asyncio.sleep(wait_time)
+            else:
+                logger.error("❌ Bot connection failed due to network issues")
+                raise
+                
+        except FloodWait as e:
+            logger.warning(f"⚠️ Rate limited (attempt {attempt}): waiting {e.value}s")
+            if attempt < max_retries:
+                await asyncio.sleep(e.value)
+            else:
+                logger.error("❌ Bot connection failed due to rate limiting")
+                raise
+                
+        except Exception as e:
+            logger.error(f"❌ Unexpected error on attempt {attempt}: {e}")
+            if attempt < max_retries:
+                wait_time = min(2 ** attempt, 30)
+                logger.info(f"⏳ Retrying in {wait_time} seconds...")
+                await asyncio.sleep(wait_time)
+            else:
+                raise
+
+
 async def start_services() -> None:
     """
     Start all bot services in correct order.
     """
     try:
-        # Start the bot
+        # Start the bot with retry logic
         logger.info("🤖 Initializing Telegram Bot...")
-        StreamBot.start()
+        await start_bot_with_retry()
         
         # Get bot info
         bot_info = await StreamBot.get_me()
@@ -166,6 +245,24 @@ async def start_services() -> None:
         sys.exit(1)
     except AccessTokenInvalid:
         logger.error("❌ Invalid bot token - check your BOT_TOKEN")
+        sys.exit(1)
+    except BadMsgNotification as e:
+        logger.error(f"❌ Telegram time synchronization error: {e}")
+        logger.error("💡 This error means:")
+        logger.error("   • Your system clock is out of sync with real time")
+        logger.error("   • Telegram servers are having issues")
+        logger.error("   • Network connectivity problems")
+        logger.error("")
+        logger.error("🔧 Solutions to try:")
+        logger.error("   1. Linux: sudo ntpdate -s time.nist.gov")
+        logger.error("   2. Windows: w32tm /resync")
+        logger.error("   3. Restart your system")
+        logger.error("   4. Check internet connection")
+        logger.error("   5. Wait a few minutes and try again")
+        sys.exit(1)
+    except NetworkError as e:
+        logger.error(f"❌ Network connection error: {e}")
+        logger.error("💡 Check your internet connection and try again")
         sys.exit(1)
     except Exception as e:
         logger.error(f"❌ Failed to start services: {e}")
