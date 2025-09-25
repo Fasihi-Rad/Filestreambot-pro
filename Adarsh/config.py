@@ -164,14 +164,18 @@ class BotConfig:
                         number_part = size_str[:-len(suffix)].strip()
                         if number_part:  # Make sure there's a number
                             number = float(number_part)
-                            return int(number * multiplier)
-                    except ValueError:
-                        logger.warning(f"Invalid number in size format: {size_str}")
+                            result = int(number * multiplier)
+                            logger.info(f"✅ Parsed size '{size_str}' as {result} bytes")
+                            return result
+                    except ValueError as e:
+                        logger.warning(f"Invalid number in size format: {size_str} - {e}")
                         break
             
             # Try to parse as plain number (bytes)
             try:
-                return int(size_str)
+                result = int(size_str)
+                logger.info(f"✅ Parsed size '{size_str}' as {result} bytes (plain number)")
+                return result
             except ValueError:
                 logger.warning(f"Invalid size format: {size_str}, using 4GB default")
                 return 4 * 1024 * 1024 * 1024
