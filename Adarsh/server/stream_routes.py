@@ -10,7 +10,7 @@ import mimetypes
 from aiohttp import web
 from aiohttp.http_exceptions import BadStatusLine
 from Adarsh.bot import multi_clients, work_loads, StreamBot
-from Adarsh.server.exceptions import FIleNotFound, InvalidHash
+from Adarsh.server.exceptions import FileNotFound, InvalidHash
 from Adarsh import StartTime, __version__
 from ..utils.time_format import get_readable_time
 from ..utils.custom_dl import ByteStreamer
@@ -53,7 +53,7 @@ async def stream_handler(request: web.Request):
         return web.Response(text=await render_page(id, secure_hash), content_type='text/html')
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
-    except FIleNotFound as e:
+    except FileNotFound as e:
         raise web.HTTPNotFound(text=e.message)
     except (AttributeError, BadStatusLine, ConnectionResetError):
         pass
@@ -75,7 +75,7 @@ async def stream_handler(request: web.Request):
         return await media_streamer(request, id, secure_hash)
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
-    except FIleNotFound as e:
+    except FileNotFound as e:
         raise web.HTTPNotFound(text=e.message)
     except (AttributeError, BadStatusLine, ConnectionResetError):
         pass

@@ -7,63 +7,282 @@ import asyncio
 import aiofiles
 import datetime
 import re
+import logging
+from typing import Dict, List, Optional
+from pathlib import Path
+
+from pyrogram import filters, Client
+from pyrogram.types import Message
+from pyrogram.errors import PeerIdInvalid, UserIsBlocked, ChatWriteForbidden
+
 from Adarsh.utils.broadcast_helper import send_msg
 from Adarsh.utils.database import Database
 from Adarsh.bot import StreamBot
 from Adarsh.vars import Var
-from pyrogram import filters, Client
-from pyrogram.types import Message
 from Adarsh.utils.human_readable import byte_to_human_read
 
+logger = logging.getLogger(__name__)
 db = Database(Var.DATABASE_URL, Var.NAME)
-Broadcast_IDs = {}
+Broadcast_IDs: Dict[str, Dict[str, int]] = {}
 
-@StreamBot.on_message(filters.command("admin") & filters.private )
-async def sts(c: Client, m: Message):
-    user_id=m.from_user.id
-    if user_id in Var.OWNER_ID:
-        LIST_MSG = "Hi ! {} Here is a list of all Admin commands \n \n 1 . `/Admin` \n 2. `/users` : Display The Number of Users \n 3. `/userslist` : Display The Names of All Users \n 4. `/deluser` __ID__ : Delete The User \n 5. `/banuser` __ID__ : Ban The User \n 6. `/Status📊` \n 7. `/userinfo` __ID__ : Display The User Info \n 8. `/broadcast` \n 8. `/cus` __ID__ __STATUS__ : Change user status"
-        await c.send_message(chat_id = m.chat.id,
-            text = LIST_MSG.format(m.from_user.mention(style="md"))
+def is_admin(user_id: int) -> bool:
+    """Check if user is admin"""
+    return user_id in Var.OWNER_ID
+
+@StreamBot.on_message(filters.command("admin") & filters.private)
+async def admin_commands(client: Client, message: Message) -> None:
+    """Show admin commands list"""
+    try:
+        if not is_admin(message.from_user.id):
+            await message.reply_text("❌ You are not authorized to use this command.")
+            return
+            
+        admin_help = (
+            f"👋 Hi {message.from_user.mention(style='md')}!\n\n"
+            "🔧 **Admin Commands:**\n\n"
+            "1️⃣ `/admin` - Show this help\n"
+            "2️⃣ `/users` - Display total user count\n"
+            "3️⃣ `/userslist` - Display all user names\n"
+            "4️⃣ `/deluser <ID>` - Delete user\n"
+            "5️⃣ `/banuser <ID>` - Ban user\n"
+            "6️⃣ `/userinfo <ID>` - Display user info\n"
+            "7️⃣ `/broadcast` - Broadcast message to all users\n"
+            "8️⃣ `/cus <ID> <STATUS>` - Change user status\n\n"
+            "📊 Use `/status` for bot statistics"
         )
-
-@StreamBot.on_message(filters.command("users") & filters.private )
-async def sts(c: Client, m: Message):
-    user_id=m.from_user.id
-    if user_id in Var.OWNER_ID:
-        total_users = await db.total_users_count()
-        await m.reply_text(text=f"<b>Total Users in DB: {total_users}</b>", quote=True)
-
-@StreamBot.on_message(filters.command("userslist") & filters.private )       
-async def sts(c: Client, m: Message):
-    user_id=m.from_user.id
-    if user_id in Var.OWNER_ID:
-        await m.reply_text(text=f"<b>It's may take several moment !</b> \n__Please Wait__ ", quote=True)
-        users_list = []
-        all_users = await db.get_all_users()
-        async for user in all_users:
-            users_list.append(f"[{user['name']}](tg://user?id={user['id']})")
-        await m.reply_text(text="All Users: \n\n" + ('   '.join(users_list)), quote=True)
         
-@StreamBot.on_message(filters.command("deluser") & filters.private )       
-async def sts(c: Client, m: Message):
-    user_id=m.from_user.id
-    if user_id in Var.OWNER_ID:
-        deluser_ids = re.findall(r"([\d]+)", m.text)
-        await m.reply_text(text=f"<b>It's may take several moment !</b> \n Users : {deluser_ids} ", quote=True)
-        for deluser_id in deluser_ids:
-            await db.delete_user(deluser_id)
-            await m.reply_text(text=f"<b>User [{deluser_id}](tg://user?id={deluser_id}) deleted.</b>", quote=True)
+        await message.reply_text(admin_help)
+        logger.info(f"Admin {message.from_user.id} accessed admin commands")
+        
+    except Exception as e:
+        logger.error(f"Error in admin command: {e}")
+        await message.reply_text("❌ An error occurred while processing the command.")
 
-@StreamBot.on_message(filters.command("banuser") & filters.private )       
-async def sts(c: Client, m: Message):
-    user_id=m.from_user.id
-    if user_id in Var.OWNER_ID:
-        banuser_ids = re.findall(r"([\d]+)", m.text)
-        await m.reply_text(text=f"<b>It's may take several moment !</b> \n Users : {banuser_ids} ", quote=True)
-        for banuser_id in banuser_ids:
-            await db.ban_user(banuser_id)
-            await m.reply_text(text=f"<b>User [{banuser_id}](tg://user?id={banuser_id}) banned.</b>", quote=True)
+@StreamBot.on_message(filters.command("users") & filters.private)
+async def users_count(client: Client, message: Message) -> None:
+    """Show total users count"""
+    try:
+        if not is_admin(message.from_user.id):
+            await message.reply_text("❌ You are not authorized to use this command.")
+            return
+            
+        total_users = await db.total_users_count()
+        await message.reply_text(
+            f"📊 **Database Statistics:**\n\n"
+            f"👥 Total Users: **{total_users:,}**",
+            quote=True
+        )
+        logger.info(f"Admin {message.from_user.id} checked user count: {total_users}")
+        
+    except Exception as e:
+        logger.error(f"Error getting user count: {e}")
+        await message.reply_text("❌ Failed to retrieve user count.")
+
+@StreamBot.on_message(filters.command("userslist") & filters.private)
+async def users_list(client: Client, message: Message) -> None:
+    """Show all users list with pagination"""
+    try:
+        if not is_admin(message.from_user.id):
+            await message.reply_text("❌ You are not authorized to use this command.")
+            return
+            
+        status_msg = await message.reply_text(
+            "⏳ **Fetching users list...**\n"
+            "_This may take a few moments..._",
+            quote=True
+        )
+        
+        users_list: List[str] = []
+        all_users = await db.get_all_users()
+        
+        if all_users is None:
+            await status_msg.edit_text("❌ Failed to fetch users from database.")
+            return
+            
+        user_count = 0
+        async for user in all_users:
+            user_count += 1
+            name = user.get('name', 'Unknown')
+            user_id = user.get('id', 'Unknown')
+            users_list.append(f"[{name}](tg://user?id={user_id})")
+            
+            # Prevent message too long error - split into chunks
+            if user_count % 50 == 0:
+                current_list = users_list[-50:]
+                chunk_text = f"👥 **Users ({user_count-49} - {user_count}):**\n\n" + "   ".join(current_list)
+                await message.reply_text(chunk_text, quote=True)
+        
+        # Send remaining users
+        if users_list:
+            remaining_start = (user_count // 50) * 50 + 1
+            remaining_users = users_list[remaining_start-1:] if remaining_start > 1 else users_list
+            if remaining_users:
+                final_text = f"👥 **Users ({remaining_start} - {user_count}):**\n\n" + "   ".join(remaining_users)
+                await message.reply_text(final_text, quote=True)
+        
+        await status_msg.edit_text(f"✅ **Users list completed!**\n📊 Total users: **{user_count:,}**")
+        logger.info(f"Admin {message.from_user.id} requested users list ({user_count} users)")
+        
+    except Exception as e:
+        logger.error(f"Error getting users list: {e}")
+        await message.reply_text("❌ Failed to retrieve users list.")
+        
+@StreamBot.on_message(filters.command("deluser") & filters.private)
+async def delete_user(client: Client, message: Message) -> None:
+    """Delete users from database"""
+    try:
+        if not is_admin(message.from_user.id):
+            await message.reply_text("❌ You are not authorized to use this command.")
+            return
+            
+        # Extract user IDs from command
+        user_ids = re.findall(r"(\d+)", message.text)
+        
+        if not user_ids:
+            await message.reply_text(
+                "❌ **Invalid format!**\n\n"
+                "**Usage:** `/deluser <user_id1> [user_id2] ...`\n"
+                "**Example:** `/deluser 123456789` or `/deluser 123 456 789`"
+            )
+            return
+        
+        if len(user_ids) > 10:
+            await message.reply_text("❌ You can delete maximum 10 users at once.")
+            return
+            
+        status_msg = await message.reply_text(
+            f"⏳ **Deleting users...**\n"
+            f"👥 Users to delete: `{', '.join(user_ids)}`",
+            quote=True
+        )
+        
+        deleted_count = 0
+        failed_count = 0
+        results = []
+        
+        for user_id_str in user_ids:
+            try:
+                user_id = int(user_id_str)
+                
+                # Check if user exists first
+                user_info = await db.user_info(user_id)
+                if not user_info:
+                    results.append(f"❌ User `{user_id}` not found")
+                    failed_count += 1
+                    continue
+                
+                # Delete user
+                success = await db.delete_user(user_id)
+                if success:
+                    results.append(f"✅ User [{user_id}](tg://user?id={user_id}) deleted")
+                    deleted_count += 1
+                    logger.info(f"Admin {message.from_user.id} deleted user {user_id}")
+                else:
+                    results.append(f"❌ Failed to delete user `{user_id}`")
+                    failed_count += 1
+                    
+            except ValueError:
+                results.append(f"❌ Invalid user ID: `{user_id_str}`")
+                failed_count += 1
+            except Exception as e:
+                logger.error(f"Error deleting user {user_id_str}: {e}")
+                results.append(f"❌ Error deleting user `{user_id_str}`")
+                failed_count += 1
+        
+        # Send results
+        result_text = (
+            f"🗑️ **Delete Users Complete**\n\n"
+            f"✅ Deleted: **{deleted_count}**\n"
+            f"❌ Failed: **{failed_count}**\n\n"
+            + "\n".join(results)
+        )
+        
+        await status_msg.edit_text(result_text)
+        
+    except Exception as e:
+        logger.error(f"Error in delete user command: {e}")
+        await message.reply_text("❌ An error occurred while deleting users.")
+
+@StreamBot.on_message(filters.command("banuser") & filters.private)
+async def ban_user(client: Client, message: Message) -> None:
+    """Ban users from using the bot"""
+    try:
+        if not is_admin(message.from_user.id):
+            await message.reply_text("❌ You are not authorized to use this command.")
+            return
+            
+        # Extract user IDs from command
+        user_ids = re.findall(r"(\d+)", message.text)
+        
+        if not user_ids:
+            await message.reply_text(
+                "❌ **Invalid format!**\n\n"
+                "**Usage:** `/banuser <user_id1> [user_id2] ...`\n"
+                "**Example:** `/banuser 123456789` or `/banuser 123 456 789`"
+            )
+            return
+        
+        if len(user_ids) > 10:
+            await message.reply_text("❌ You can ban maximum 10 users at once.")
+            return
+            
+        status_msg = await message.reply_text(
+            f"⏳ **Banning users...**\n"
+            f"👥 Users to ban: `{', '.join(user_ids)}`",
+            quote=True
+        )
+        
+        banned_count = 0
+        failed_count = 0
+        results = []
+        
+        for user_id_str in user_ids:
+            try:
+                user_id = int(user_id_str)
+                
+                # Check if user exists first
+                user_info = await db.user_info(user_id)
+                if not user_info:
+                    results.append(f"❌ User `{user_id}` not found")
+                    failed_count += 1
+                    continue
+                
+                # Check if already banned
+                if user_info.get('status') == 'banned':
+                    results.append(f"⚠️ User [{user_id}](tg://user?id={user_id}) already banned")
+                    continue
+                
+                # Ban user
+                success = await db.ban_user(user_id)
+                if success:
+                    results.append(f"🔨 User [{user_id}](tg://user?id={user_id}) banned")
+                    banned_count += 1
+                    logger.info(f"Admin {message.from_user.id} banned user {user_id}")
+                else:
+                    results.append(f"❌ Failed to ban user `{user_id}`")
+                    failed_count += 1
+                    
+            except ValueError:
+                results.append(f"❌ Invalid user ID: `{user_id_str}`")
+                failed_count += 1
+            except Exception as e:
+                logger.error(f"Error banning user {user_id_str}: {e}")
+                results.append(f"❌ Error banning user `{user_id_str}`")
+                failed_count += 1
+        
+        # Send results
+        result_text = (
+            f"🔨 **Ban Users Complete**\n\n"
+            f"✅ Banned: **{banned_count}**\n"
+            f"❌ Failed: **{failed_count}**\n\n"
+            + "\n".join(results)
+        )
+        
+        await status_msg.edit_text(result_text)
+        
+    except Exception as e:
+        logger.error(f"Error in ban user command: {e}")
+        await message.reply_text("❌ An error occurred while banning users.")
 
 @StreamBot.on_message(filters.command("cus") & filters.private )
 async def sts(c: Client, m: Message):

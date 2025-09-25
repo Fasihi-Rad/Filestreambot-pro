@@ -1,50 +1,17 @@
 # (c) Fasihi-Rad
-import os
-from os import getenv, environ
-from dotenv import load_dotenv
-from Adarsh.utils.file_size import human_read_to_byte
+# (c) Fasihi-Rad
+# Backward compatibility wrapper for old configuration system
+# New code should use Adarsh.config instead
 
-def my_bool(string):
-    if string == "True":
-        return True
-    elif string == "False":
-        return False
+import warnings
+from .config import config, Var as NewVar
 
-load_dotenv()
+# Issue deprecation warning
+warnings.warn(
+    "Adarsh.vars is deprecated. Use Adarsh.config instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
-class Var(object):
-    MULTI_CLIENT = False
-    API_ID = int(getenv('API_ID'))
-    API_HASH = str(getenv('API_HASH'))
-    BOT_TOKEN = str(getenv('BOT_TOKEN'))
-    NAME = str(getenv('name', 'filetolinkbot'))
-    SLEEP_THRESHOLD = int(getenv('SLEEP_THRESHOLD', '60'))
-    WORKERS = int(getenv('WORKERS', '4'))
-    BIN_CHANNEL = int(getenv('BIN_CHANNEL'))
-    PORT = int(getenv('PORT', 8080))
-    BIND_ADRESS = str(getenv('WEB_SERVER_BIND_ADDRESS', '0.0.0.0'))
-    PING_INTERVAL = int(environ.get("PING_INTERVAL", "1200"))  # 20 minutes
-    OWNER_ID = list(int(x) for x in os.environ.get("OWNER_ID", "").split())
-    NO_PORT = my_bool(getenv('NO_PORT', 'False'))
-    APP_NAME = None
-    OWNER_USERNAME = str(getenv('OWNER_USERNAME'))
-    if 'DYNO' in environ:
-        ON_HEROKU = True
-        APP_NAME = str(getenv('APP_NAME'))
-    
-    else:
-        ON_HEROKU = False
-    FQDN = str(getenv('FQDN', BIND_ADRESS)) if not ON_HEROKU or getenv('FQDN') else APP_NAME+'.herokuapp.com'
-    HAS_SSL = my_bool(getenv('HAS_SSL','False'))
-    if HAS_SSL:
-        URL = "https://{}/".format(FQDN)
-    else:
-        URL = "https://{}/".format(FQDN) if ON_HEROKU or NO_PORT else \
-            "http://{}:{}/".format(FQDN, PORT)
-    DATABASE_URL = str(getenv('DATABASE_URL'))
-    UPDATES_CHANNEL = str(getenv('UPDATES_CHANNEL', None))
-    BANNED_CHANNELS = list(set(int(x) for x in str(getenv("BANNED_CHANNELS", "-1001362659779")).split()))
-    PERIVEAT = my_bool(getenv("PERIVEAT", 'True'))
-    SUB_PASS = str(getenv("SUB_PASS", None))
-    DAILY_LIMIT_FILE = int(getenv("DAILY_LIMIT_FILE", 5))
-    DAILY_LIMIT_DOWNLOAD = human_read_to_byte(str(getenv("DAILY_LIMIT_DOWNLOAD", '4GB')))
+# For backward compatibility, expose the old interface
+Var = NewVar

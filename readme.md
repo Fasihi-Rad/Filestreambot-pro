@@ -23,6 +23,30 @@
 
 ## Please Follow me so you know whenever I release a new Project!❤️‍🔥
 
+## � Version 2.0 Updates
+
+### 🔧 Major Fixes
+- **Fixed Race Condition**: Users can no longer bypass download limits by sending multiple files simultaneously
+- **Atomic Database Operations**: All limit checks and updates are now thread-safe
+- **Improved Error Handling**: Better exception handling and user-friendly error messages
+- **Updated Dependencies**: All libraries updated to latest stable versions
+- **Code Quality**: Fixed numerous bugs and improved code structure
+
+### 🛡️ Security Improvements  
+- User-specific locks prevent concurrent bypass attempts
+- Input validation for all environment variables
+- Secure error handling without exposing sensitive information
+
+### 📊 Performance Enhancements
+- Atomic MongoDB operations reduce database queries
+- Efficient file processing with proper limit enforcement  
+- Memory optimization with automatic cleanup
+
+- Race-condition-free download limiting
+- Atomic database operations for data consistency
+- Enhanced admin controls and user management
+- Better error recovery and resilience
+
 ## 🍁 About This Bot :
 
 ![streamingfilestreambot-professional-live_1](https://user-images.githubusercontent.com/88939380/137127129-a86fc939-2931-4c66-b6f6-b57711a9eab7.png)
