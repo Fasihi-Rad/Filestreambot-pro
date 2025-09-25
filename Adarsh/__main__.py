@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List
 
 from pyrogram import idle
-from pyrogram.errors import ApiIdInvalid, ApiIdPublishedFlood, AccessTokenInvalid, BadMsgNotification, NetworkError, FloodWait
+from pyrogram.errors import ApiIdInvalid, ApiIdPublishedFlood, AccessTokenInvalid, BadMsgNotification, FloodWait
 
 from .bot import StreamBot
 from .vars import Var
@@ -148,14 +148,14 @@ async def start_bot_with_retry(max_retries: int = 5) -> None:
                 logger.error("🔧 Try running: sudo ntpdate -s time.nist.gov (Linux)")
                 raise
                 
-        except NetworkError as e:
-            logger.warning(f"⚠️ Network error (attempt {attempt}): {e}")
+        except (ConnectionError, OSError, TimeoutError) as e:
+            logger.warning(f"⚠️ Network/Connection error (attempt {attempt}): {e}")
             if attempt < max_retries:
                 wait_time = min(2 ** attempt, 30)
                 logger.info(f"⏳ Retrying in {wait_time} seconds...")
                 await asyncio.sleep(wait_time)
             else:
-                logger.error("❌ Bot connection failed due to network issues")
+                logger.error("❌ Bot connection failed due to network/connection issues")
                 raise
                 
         except FloodWait as e:
@@ -260,8 +260,8 @@ async def start_services() -> None:
         logger.error("   4. Check internet connection")
         logger.error("   5. Wait a few minutes and try again")
         sys.exit(1)
-    except NetworkError as e:
-        logger.error(f"❌ Network connection error: {e}")
+    except (ConnectionError, OSError, TimeoutError) as e:
+        logger.error(f"❌ Network/Connection error: {e}")
         logger.error("💡 Check your internet connection and try again")
         sys.exit(1)
     except Exception as e:
